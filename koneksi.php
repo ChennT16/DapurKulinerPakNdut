@@ -1,6 +1,10 @@
 <?php
-$conn=mysqli_connect("localhost", "root", "", "umkm");
+$conn = mysqli_connect("localhost", "root", "", "umkm");
 
-var_dump($result);
+if (!$conn) {
+    die("Koneksi gagal: " . mysqli_connect_error());
+}
+echo "Koneksi berhasil ke database!";
 ?>
+
 
