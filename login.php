@@ -15,8 +15,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     } elseif ($role == "Owner") {
-    $email = $_POST['ownerEmail'];
-    $pass = $_POST['ownerPass'];
+        $email = $_POST['ownerEmail'];
+        $pass = $_POST['ownerPass'];
 
     // Login Owner
     if ($email == "owner@mail.com" && $pass == "12345") {
@@ -145,7 +145,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
 
     <div class="login-container">
-        <h2>Login Dapur Pak Ndut</h2>
+    <h2>Login Dapur Pak Ndut</h2>
 
     <div class="tab-buttons">
         <button id="btnAdmin" class="active" onclick="showForm('admin')">Admin</button>
@@ -180,7 +180,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <button type="submit" class="login-btn">Login Owner</button>
     </form>
 
-    <a href="Iindex.umkm.html" class="back-link">← Kembali ke Beranda</a>
+    <a href="index.html" class="back-link">← Kembali ke Beranda</a>
     </div>
 
     <script>
@@ -192,8 +192,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         document.getElementById('btnOwner').classList.remove('active');
 
         if (role === 'admin') {
-        document.getElementById('formAdmin').classList.add('active');
-        document.getElementById('btnAdmin').classList.add('active');
+            document.getElementById('formAdmin').classList.add('active');
+            document.getElementById('btnAdmin').classList.add('active');
         } else {
             document.getElementById('formOwner').classList.add('active');
             document.getElementById('btnOwner').classList.add('active');
