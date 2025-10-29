@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dapur Pak Ndut - UMKM Kuliner Terbaik</title>
+    <link rel="stylesheet" href="stile.css">
+    <script src="script.js" defer></script>
+
+
+    </head>
+<body>
+    <header id="header">
+        <nav>
+            <a href="#tentang" class="logo">
+                <div class="logo-icon">👨‍🍳</div>
+                <span>Dapur Kuliner Pak Ndut</span>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#beranda">Beranda</a></li>
+                <li><a href="#tentang">Tentang</a></li>
+                <li><a href="#menu">Menu</a></li>
+                <li><a href="#kontak">Kontak</a></li>
+                <li><a href="#login" class="login-btn">Login</a></li>
+            </ul>
+            <div class="PakNdut" id="PakNdut">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </nav>
+    </header>
+
+    <section id="beranda">
+    <div class="hero-content">
+        <h1>Dapur Pak Ndut</h1>
+        <p>Temukan kelezatan kuliner dalam beberapa klik. Makanan lezat dan terjangkau, siap diantar ke lokasi Anda!</p>
+        <a href="#menu" class="cta-button">LIHAT MENU</a>
+    </div>
+
+    <div class="hero-image">
+        <div class="chef-circle">
+            <img src="logo_kuliner_pak_dut.png" alt= width="700" height="700">
+        </div>
+    </div>
+</section>
+
+
+    <section id="tentang">
+        <h2 class="section-title">Tentang Kami</h2>
+        <div class="tentang-content">
+            <div class="tentang-text">
+                <h3>UMKM Dapur Kuliner Pak Ndut</h3>
+                <p>Dapur Pak Ndut adalah UMKM kuliner yang berkomitmen menyajikan makanan dan minuman berkualitas dengan harga terjangkau. Kami menggunakan bahan-bahan segar dan resep tradisional yang telah teruji.</p>
+                <p>Setiap hidangan dibuat dengan penuh cinta dan perhatian untuk memastikan kepuasan pelanggan kami.</p>
+                
+                <div class="tentang-features">
+                    <div class="feature-box">
+                        <h4>✨ Bahan Berkualitas</h4>
+                        <p>Hanya menggunakan bahan segar dan berkualitas tinggi</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>💰 Harga Terjangkau</h4>
+                        <p>Menu dengan harga yang ramah di kantong</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>🚀 Pelayanan Cepat</h4>
+                        <p>Pesanan diproses dengan cepat dan efisien</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>😊 Rasa Nikmat</h4>
+                        <p>Cita rasa yang lezat dan menggugah selera</p>
+                    </div>
+                </div>
+            </div>
+            <div class="tentang-image">
+                <div class="about-chef">
+                    <img src="LINGKARAN MENU.png" alt=width="700" height="500">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="menu">
+    <h2 class="section-title">Menu</h2>
+        <div class="menu-container">
+            <button class="slider-btn left" onclick="slideMenu(-1)">‹</button>
+                <div class="menu-slider" id="menuSlider">
+                    <div class="menu-item">
+                        <div class="menu-image" style="background-image: url('PENTOL.jpg');"></div>
+                        <div class="menu-info">
+                            <h3>Pentol</h3>
+                        <div class="menu-price">Rp 5.000</div>
+                        <button class="order-btn" onclick="orderItem('Pentol')">Pesan Sekarang</button>
+                    </div>
+                </div>
+
+                <div class="menu-item">
+                    <div class="menu-image" style="background-image: url('PENTOL TAHU.jpg');"></div>
+                    <div class="menu-info">
+                            <h3>Pentol Tahu</h3>
+                        <div class="menu-price">Rp 5.000</div>
+                        <button class="order-btn" onclick="orderItem('Pentol Tahu')">Pesan Sekarang</button>
+                    </div>
+                </div>
+
+                <div class="menu-item">
+                    <div class="menu-image" style="background-image: url('PENTOL BAKAR.jpg');"></div>
+                    <div class="menu-info">
+                            <h3>Pentol Bakar</h3>
+                        <div class="menu-price">Rp 1.000</div>
+                        <button class="order-btn" onclick="orderItem('Pentol Bakar')">Pesan Sekarang</button>
+                    </div>
+                </div>
+
+                <div class="menu-item">
+                    <div class="menu-image" style="background-image: url('TAHU BAKAR.jpg');"></div>
+                    <div class="menu-info">
+                            <h3>Tahu Bakar</h3>
+                        <div class="menu-price">Rp 1.000</div>
+                        <button class="order-btn" onclick="orderItem('Tahu Bakar')">Pesan Sekarang</button>
+                    </div>
+                </div>
+
+                <div class="menu-item">
+                    <div class="menu-image" style="background-image: url('GORENGAN PANGSIT.jpg');"></div>
+                    <div class="menu-info">
+                            <h3>Gorengan Pangsit</h3>
+                        <div class="menu-price">Rp 5.000</div>
+                        <button class="order-btn" onclick="orderItem('Gorengan Pangsit')">Pesan Sekarang</button>
+                    </div>
+                </div>
+
+                <div class="menu-item">
+                    <div class="menu-image" style="background-image: url('ES KUWUT.jpg');"></div>
+                    <div class="menu-info">
+                            <h3>Es Kuwut</h3>
+                        <div class="menu-price">Rp 3.000</div>
+                        <button class="order-btn" onclick="orderItem('Es Kuwut')">Pesan Sekarang</button>
+                    </div>
+                </div>
+
+                <div class="menu-item">
+                    <div class="menu-image" style="background-image: url('ES RASA RASA.jpg');"></div>
+                    <div class="menu-info">
+                            <h3>Es Rasa-Rasa</h3>
+                        <div class="menu-price">Rp 3.000</div>
+                        <button class="order-btn" onclick="orderItem('Es Rasa-Rasa')">Pesan Sekarang</button>
+                    </div>
+                </div>
+
+                <div class="menu-item">
+                    <div class="menu-image" style="background-image: url('LEMON TEA.jpg');"></div>
+                    <div class="menu-info">
+                            <h3>Es Teh Lemon</h3>
+                        <div class="menu-price">Rp 3.000</div>
+                        <button class="order-btn" onclick="orderItem('Es Teh Lemon')">Pesan Sekarang</button>
+                    </div>
+                </div>
+
+                <div class="menu-item">
+                    <div class="menu-image" style="background-image: url('SUSU KEDELAI.jpg');"></div>
+                    <div class="menu-info">
+                            <h3>Susu Kedelai</h3>
+                        <div class="menu-price">Rp 6.000</div>
+                    <button class="order-btn" onclick="orderItem('Susu Kedelai')">Pesan Sekarang</button>
+                    </div>
+                </div>
+            </div>
+            <button class="slider-btn right" onclick="slideMenu(1)">›</button>
+        </div>
+    </section>
+
+    <section id="kontak">
+        <h2 class="section-title">Hubungi Kami</h2>
+        <div class="kontak-container">
+            <div class="kontak-info">
+                <div class="info-box">
+                    <h4>📍 Lokasi Jual</h4>
+                    <p>Depan Pabrik SAi<br>Pandean, Gondang, Nganjuk<br>Indonesia</p>
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d728.0764417402464!2d111.96473740035697!3d-7.529787241304638!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7837506616ca65%3A0xed2c4c8ba71ac0!2sPENTOL%20BAKAR%20PAK%20NDUT!5e0!3m2!1sid!2sid!4v1761654042692!5m2!1sid!2sid"
+                    width="600" height="360" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    <h4>📍 Lokasi Produksi</h4>
+                    <p>Indarwi Collection<br>Balonggebang, Gondang, Nganjuk<br>Indonesia</p>
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d571.2356269394016!2d111.96974004495371!3d-7.53099917148394!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7837bf5b33c7f7%3A0xec02437aa4aea52d!2sIradwi_collection!5e0!3m2!1sid!2sid!4v1761653980009!5m2!1sid!2sid"
+                    width="600" height="360" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+                <div class="info-box">
+                    <h4>📞 Telepon</h4>
+                    <p>+62 853-3569-6918<br>Senin - Minggu: 08.00 - 22.00 WIB</p>
+                </div>
+                <div class="info-box">
+                    <h4>📧 Email</h4>
+                    <p>info@dapurpakndut.com<br>order@dapurpakndut.com</p>
+                </div>
+                <div class="info-box">
+                    <h4>💬 Media Sosial</h4>
+                    <p>Instagram: @pentolbakar.pakndut<br>Tiktok: pentolbakar.pakndut</p>
+                </div>
+            </div>
+            <div class="contact-form">
+                <h3 style="margin-bottom: 25px; color: #333;">Kirim Pesan</h3>
+                <form id="contactForm" onsubmit="submitForm(event)">
+                    <div class="form-group">
+                        <label for="nama">Nama</label>
+                        <input type="text" id="nama" name="nama" required placeholder="Masukkan nama Anda">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required placeholder="Masukkan email Anda">
+                    </div>
+                    <div class="form-group">
+                        <label for="pesan">Pesan</label>
+                        <textarea id="pesan" name="pesan" rows="5" required placeholder="Tulis pesan Anda"></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">Kirim Pesan</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Kuliner Dapur Pak Ndut - UMKM Kuliner Terbaik. Semua Hak Dilindungi.</p>
+    </footer>
+
+    
+</body>
+</html>
