@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | Dapur Pak Ndut</title>
+  <link rel="stylesheet" href="halamanlogin.css" />
+</head>
+<body>
+  <!-- Navbar -->
+  <header>
+    <nav class="navbar">
+      <div class="logo">
+        <img src="logo_kuliner_pak_dut.png" alt="Logo Pak Ndut" />
+        <h1>Pak Ndut</h1>
+      </div>
+      <ul class="nav-links">
+        <li><a href="login.html" class="active">Login</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Login Section -->
+  <section class="login-section">
+    <div class="login-box">
+      <h2>Masuk ke Akun Anda</h2>
+      <p>Pilih peran dan masuk ke sistem Dapur Pak Ndut 🍽️</p>
+
+      <form action="proses_login.php" method="POST">
+        <div class="input-group">
+          <label for="role">Login Sebagai</label>
+          <select id="role" name="role" required>
+            <option value="">-- Pilih peran --</option>
+            <option value="admin">Admin</option>
+            <option value="karyawan">Karyawan</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" placeholder="Masukkan username" required />
+        </div>
+
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Masukkan password" required />
+        </div>
+
+        <button type="submit" class="btn-login">Login</button>
+
+        <p class="register-text">
+          Belum punya akun? <a href="#">Daftar di sini</a>
+        </p>
+        <a href="Iindex.umkm.html" class="back-home">← Kembali ke Beranda</a>
+      </form>
+    </div>
+  </section>
+</body>
+</html>
