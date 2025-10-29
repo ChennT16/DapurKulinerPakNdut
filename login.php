@@ -157,11 +157,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <input type="hidden" name="role" value="Admin">
         <div class="form-group">
             <label for="adminUser">Username Admin</label>
-            <input type="text" name="adminUser" id="adminUser" required placeholder="Masukkan username admin">
+            <input type="text" name="adminUser" id="adminUser" required placeholder="Masukkan username Admin">
         </div>
         <div class="form-group">
             <label for="adminPass">Password</label>
-            <input type="password" name="adminPass" id="adminPass" required placeholder="Masukkan password admin">
+            <input type="password" name="adminPass" id="adminPass" required placeholder="Masukkan password Admin">
         </div>
         <button type="submit" class="login-btn">Login Admin</button>
     </form>
@@ -171,11 +171,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <input type="hidden" name="role" value="Owner">
         <div class="form-group">
             <label for="ownerEmail">Email Owner</label>
-            <input type="email" name="ownerEmail" id="ownerEmail" required placeholder="Masukkan email owner">
+            <input type="email" name="ownerEmail" id="ownerEmail" required placeholder="Masukkan email Owner">
         </div>
         <div class="form-group">
             <label for="ownerPass">Password</label>
-            <input type="password" name="ownerPass" id="ownerPass" required placeholder="Masukkan password owner">
+            <input type="password" name="ownerPass" id="ownerPass" required placeholder="Masukkan password Owner">
         </div>
         <button type="submit" class="login-btn">Login Owner</button>
     </form>
