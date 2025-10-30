@@ -1,26 +1,26 @@
-<?ph
+<?php
 session_start();
-
+unset($_SESSION['menu']); // <-- tambahkan ini sementara untuk reset data
 // Data menu
 if (!isset($_SESSION['menu'])) {
   $_SESSION['menu'] = [
     ["id"=>1, "nama"=>"Pentol Tahu", "stok"=>10, "gambar"=>"PENTOL TAHU.jpg"],
-    ["id"=>2, "nama"=>"Pentol ", "stok"=>12, "gambar"=>"PENTOL.jpg"],
-    ["id"=>3, "nama"=>"Tahu Goreng", "stok"=>8, "gambar"=>"images/tahu_goreng.jpg"],
-    ["id"=>4, "nama"=>"Siomay", "stok"=>6, "gambar"=>"images/siomay.jpg"],
-    ["id"=>5, "nama"=>"Lontong", "stok"=>9, "gambar"=>"images/lontong.jpg"],
-    ["id"=>6, "nama"=>"Sate Usus", "stok"=>11, "gambar"=>"images/sate_usus.jpg"],
-    ["id"=>7, "nama"=>"Sate Telur", "stok"=>10, "gambar"=>"images/sate_telur.jpg"],
-    ["id"=>8, "nama"=>"Sate Kulit", "stok"=>13, "gambar"=>"images/sate_kulit.jpg"],
-    ["id"=>9, "nama"=>"Tahu Bakso", "stok"=>7, "gambar"=>"images/tahu_bakso.jpg"],
-    ["id"=>10,"nama"=>"Ceker", "stok"=>5, "gambar"=>"images/ceker.jpg"],
-    ["id"=>11,"nama"=>"Bakso Goreng", "stok"=>8, "gambar"=>"images/bakso_goreng.jpg"],
-    ["id"=>12,"nama"=>"Sosis", "stok"=>6, "gambar"=>"images/sosis.jpg"],
-    ["id"=>13,"nama"=>"Nugget", "stok"=>9, "gambar"=>"images/nugget.jpg"],
-    ["id"=>14,"nama"=>"Tempe Goreng", "stok"=>10, "gambar"=>"images/tempe_goreng.jpg"],
-    ["id"=>15,"nama"=>"Tahu Isi", "stok"=>7, "gambar"=>"images/tahu_isi.jpg"],
-    ["id"=>16,"nama"=>"Bakwan", "stok"=>12, "gambar"=>"images/bakwan.jpg"],
-    ["id"=>17,"nama"=>"Kentang", "stok"=>8, "gambar"=>"images/kentang.jpg"],
+    ["id"=>2, "nama"=>"Pentol Bakar", "stok"=>12, "gambar"=>"PENTOL BAKAR.jpg"],
+    ["id"=>3, "nama"=>"Pentol", "stok"=>8, "gambar"=>"PENTOL.jpg"],
+    ["id"=>4, "nama"=>"Rica - rica Balungan", "stok"=>6, "gambar"=>"RICA RICA BALUNGAN.jpg"],
+    ["id"=>5, "nama"=>"Nasi Bento Ati Ampela", "stok"=>9, "gambar"=>"NASI BENTO AYAM CRISPY.jpg"],
+    ["id"=>6, "nama"=>"Nasi Bento Ayam Crispy", "stok"=>11, "gambar"=>"NASI BENTO AYAM CRISPY.jpg"],
+    ["id"=>7, "nama"=>"Nasi Bento Dagingf Dan Sosis", "stok"=>10, "gambar"=>"NASI BENTO DAGING DAN SOSIS.jpg"],
+    ["id"=>8, "nama"=>"Nasi Bento Geprek", "stok"=>13, "gambar"=>"NASI BENTO GEPREK.jpg"],
+    ["id"=>9, "nama"=>"Nasi Bento Katsu", "stok"=>7, "gambar"=>"NASI BENTO KATSU.jpg"],
+    ["id"=>10,"nama"=>"Nasi Bento Rica - Rica balungan", "stok"=>5, "gambar"=>"NASI BENTO RICA RICA BALUNGAN.jpg"],
+    ["id"=>11,"nama"=>"Tahu Bakar", "stok"=>8, "gambar"=>"TAHU BAKAR.jpg"],
+    ["id"=>12,"nama"=>"Gorengan Pangsit", "stok"=>6, "gambar"=>"GORENGAN PANGSIT.jpg"],
+    ["id"=>13,"nama"=>"Es Kuwut", "stok"=>9, "gambar"=>"ES KUWUT.jpg"],
+    ["id"=>14,"nama"=>"Es Rasa - Rasa", "stok"=>10, "gambar"=>"ES RASA RASA.jpg"],
+    ["id"=>15,"nama"=>"Tahu Isi", "stok"=>7, "gambar"=>"AIR MINERAL.jpg"],
+    ["id"=>16,"nama"=>"Lemon Tea", "stok"=>12, "gambar"=>"LEMON TEA.jpg"],
+    ["id"=>17,"nama"=>"SUSU KEDELAI.jpg", "stok"=>8, "gambar"=>"SUSU KEDELAI.jpg"],
   ];
 }
 
@@ -182,13 +182,8 @@ $menuList = $_SESSION['menu'];
   <header>
     <div class="logo">
       <img src="logo_kuliner_pak_dut.png" alt="Logo Dapur Pak Ndut">
-      Dapur Pak Ndut
-    </div>
-    <nav>
-      <a href="#" style="color:white; margin-right:15px; text-decoration:none;">Beranda</a>
-      <a href="#" style="color:white; margin-right:15px; text-decoration:none;">Menu</a>
-      <a href="#" style="color:white; text-decoration:none;">Kontak</a>
-    </nav>
+      Dapur Kuliner Pak Ndut
+    
   </header>
 
   <main>
@@ -210,7 +205,7 @@ $menuList = $_SESSION['menu'];
   </main>
 
   <footer>
-    © 2025 Dapur Pak Ndut | 
+    © 2025 Dapur Pak Ndut | Semua hak dilindungi
   </footer>
 </body>
 </html>
