@@ -1,4 +1,4 @@
-<?php
+<?ph
 session_start();
 
 // Data menu
