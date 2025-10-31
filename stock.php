@@ -1,6 +1,5 @@
 <?php
 session_start();
-unset($_SESSION['menu']); // bisa kamu hapus nanti setelah data fix
 
 // Data menu
 if (!isset($_SESSION['menu'])) {
