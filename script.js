@@ -169,14 +169,15 @@ var menuItemsData = [
     { id: 7, name: 'Nasi Bento Ayam Geprek', price: 10000, category: 'Nasi Bento', image: 'NASI BENTO GEPREK.jpg' },
     { id: 8, name: 'Nasi Beff & Sosis', price: 10000, category: 'Nasi Bento', image: 'NASI BENTO DAGING DAN SOSIS.jpg' },
     { id: 9, name: 'Nasi Bento Rica-Rica Balungan', price: 8000, category: 'Nasi Bento', image: 'NASI BENTO RICA RICA BALUNGAN.jpg' },
-    { id: 10, name: 'Nasi Bento Ati Ampela', price: 8000, category: 'Nasi Bento', image: 'NASI BENTO ATI AMPELA.jpg' },
+    { id: 10, name: 'Nasi Bento Ati Ampela', price: 8000, category: 'Nasi Bento', image: 'NASI BENTO ATI AMPELA (1).jpg' },
     
     // Minuman
-    { id: 12, name: 'Es Kuwut', price: 3000, category: 'Minuman', image: 'ES KUWUT.jpg' },
-    { id: 13, name: 'Es Rasa-Rasa', price: 3000, category: 'Minuman', image: 'ES RASA RASA.jpg' },
-    { id: 14, name: 'Es Teh Lemon', price: 3000, category: 'Minuman', image: 'LEMON TEA.jpg' },
-    { id: 15, name: 'Air Mineral', price: 3000, category: 'Minuman', image: 'AIR MINERAL.jpg' },
-    { id: 16, name: 'Susu Kedelai', price: 6000, category: 'Minuman', image: 'SUSU KEDELAI.jpg' }
+    { id: 12, name: 'Susu Kedelai', price: 6000, category: 'Minuman', image: 'SUSU KEDELAI.jpg' },
+    { id: 13, name: 'Es Kuwut', price: 3000, category: 'Minuman', image: 'ES KUWUT.jpg' },
+    { id: 14, name: 'Es Rasa Rasa', price: 3000, category: 'Minuman', image: 'ES RASA RASA.jpg' },
+    { id: 15, name: 'Es Teh', price: 3000, category: 'Minuman', image: 'ES TEH.jpg' },
+    { id: 16, name: 'Teh Lemon', price: 3000, category: 'Minuman', image: 'LEMON TEA.jpg' },
+    { id: 17, name: 'Air Mineral', price: 3000, category: 'Minuman', image: 'AIR MINERAL.jpg' }
 ];
 
 var cartItems = [];
