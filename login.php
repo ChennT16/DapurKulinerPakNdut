@@ -19,8 +19,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $pass = $_POST['ownerPass'];
 
     // Login Owner
-    if ($email == "owner@mail.com" && $pass == "12345") {
-        echo "<script>alert('Login Owner berhasil!'); window.location='index.php';</script>";
+    if ($email == "owner@gmail.com" && $pass == "12345") {
+        echo "<script>alert('Login Owner berhasil!'); window.location='stock.php';</script>";
     } else {
         echo "<script>alert('Email atau Password Owner salah!');</script>";
     }
