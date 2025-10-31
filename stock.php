@@ -9,7 +9,7 @@ if (!isset($_SESSION['menu'])) {
     ["id"=>2, "nama"=>"Pentol Bakar", "stok"=>12, "gambar"=>"PENTOL BAKAR.jpg"],
     ["id"=>3, "nama"=>"Pentol", "stok"=>8, "gambar"=>"PENTOL.jpg"],
     ["id"=>4, "nama"=>"Rica - rica Balungan", "stok"=>6, "gambar"=>"RICA RICA BALUNGAN.jpg"],
-    ["id"=>5, "nama"=>"Nasi Bento Ati Ampela", "stok"=>9, "gambar"=>"NASI BENTO ATI AMPELA.jpg"],
+    ["id"=>5, "nama"=>"Nasi Bento Ati Ampela", "stok"=>9, "gambar"=>"NASI BENTO ATI AMPELA (1).jpg"],
     ["id"=>6, "nama"=>"Nasi Bento Ayam Crispy", "stok"=>11, "gambar"=>"NASI BENTO AYAM CRISPY.jpg"],
     ["id"=>7, "nama"=>"Nasi Bento Daging dan Sosis", "stok"=>10, "gambar"=>"NASI BENTO DAGING DAN SOSIS.jpg"],
     ["id"=>8, "nama"=>"Nasi Bento Geprek", "stok"=>13, "gambar"=>"NASI BENTO GEPREK.jpg"],
