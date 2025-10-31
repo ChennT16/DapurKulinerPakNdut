@@ -1,6 +1,7 @@
 <?php
 session_start();
-unset($_SESSION['menu']); // <-- tambahkan ini sementara untuk reset data
+unset($_SESSION['menu']); // bisa kamu hapus nanti setelah data fix
+
 // Data menu
 if (!isset($_SESSION['menu'])) {
   $_SESSION['menu'] = [
@@ -8,19 +9,20 @@ if (!isset($_SESSION['menu'])) {
     ["id"=>2, "nama"=>"Pentol Bakar", "stok"=>12, "gambar"=>"PENTOL BAKAR.jpg"],
     ["id"=>3, "nama"=>"Pentol", "stok"=>8, "gambar"=>"PENTOL.jpg"],
     ["id"=>4, "nama"=>"Rica - rica Balungan", "stok"=>6, "gambar"=>"RICA RICA BALUNGAN.jpg"],
-    ["id"=>5, "nama"=>"Nasi Bento Ati Ampela", "stok"=>9, "gambar"=>"NASI BENTO AYAM CRISPY.jpg"],
+    ["id"=>5, "nama"=>"Nasi Bento Ati Ampela", "stok"=>9, "gambar"=>"NASI BENTO ATI AMPELA.jpg"],
     ["id"=>6, "nama"=>"Nasi Bento Ayam Crispy", "stok"=>11, "gambar"=>"NASI BENTO AYAM CRISPY.jpg"],
-    ["id"=>7, "nama"=>"Nasi Bento Dagingf Dan Sosis", "stok"=>10, "gambar"=>"NASI BENTO DAGING DAN SOSIS.jpg"],
+    ["id"=>7, "nama"=>"Nasi Bento Daging dan Sosis", "stok"=>10, "gambar"=>"NASI BENTO DAGING DAN SOSIS.jpg"],
     ["id"=>8, "nama"=>"Nasi Bento Geprek", "stok"=>13, "gambar"=>"NASI BENTO GEPREK.jpg"],
     ["id"=>9, "nama"=>"Nasi Bento Katsu", "stok"=>7, "gambar"=>"NASI BENTO KATSU.jpg"],
-    ["id"=>10,"nama"=>"Nasi Bento Rica - Rica balungan", "stok"=>5, "gambar"=>"NASI BENTO RICA RICA BALUNGAN.jpg"],
+    ["id"=>10,"nama"=>"Nasi Bento Rica - Rica Balungan", "stok"=>5, "gambar"=>"NASI BENTO RICA RICA BALUNGAN.jpg"],
     ["id"=>11,"nama"=>"Tahu Bakar", "stok"=>8, "gambar"=>"TAHU BAKAR.jpg"],
     ["id"=>12,"nama"=>"Gorengan Pangsit", "stok"=>6, "gambar"=>"GORENGAN PANGSIT.jpg"],
     ["id"=>13,"nama"=>"Es Kuwut", "stok"=>9, "gambar"=>"ES KUWUT.jpg"],
     ["id"=>14,"nama"=>"Es Rasa - Rasa", "stok"=>10, "gambar"=>"ES RASA RASA.jpg"],
-    ["id"=>15,"nama"=>"Tahu Isi", "stok"=>7, "gambar"=>"AIR MINERAL.jpg"],
+    ["id"=>15,"nama"=>"Air Mineral", "stok"=>7, "gambar"=>"AIR MINERAL.jpg"],
     ["id"=>16,"nama"=>"Lemon Tea", "stok"=>12, "gambar"=>"LEMON TEA.jpg"],
-    ["id"=>17,"nama"=>"SUSU KEDELAI.jpg", "stok"=>8, "gambar"=>"SUSU KEDELAI.jpg"],
+    ["id"=>17,"nama"=>"Susu Kedelai", "stok"=>8, "gambar"=>"SUSU KEDELAI.jpg"],
+    ["id"=>18,"nama"=>"Es Teh", "stok"=>8, "gambar"=>"ES TEH.jpg"],
   ];
 }
 
@@ -71,8 +73,8 @@ $menuList = $_SESSION['menu'];
     }
 
     header img {
-      width: 45px;
-      height: 45px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       margin-right: 10px;
     }
@@ -158,9 +160,44 @@ $menuList = $_SESSION['menu'];
       background-color: #e67800;
     }
 
+    .footer-btn {
+      text-align: center;
+      margin: 60px 0 40px 0;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #ff6b35, #ff884d);
+      color: white;
+      padding: 14px 28px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 16px;
+      text-decoration: none;
+      box-shadow: 0 4px 10px rgba(255, 107, 53, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background: linear-gradient(135deg, #ff884d, #ff6b35);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(255, 107, 53, 0.5);
+    }
+
+    .arrow {
+      font-size: 18px;
+      transition: transform 0.3s ease;
+    }
+
+    .back-btn:hover .arrow {
+      transform: translateX(-5px);
+    }
+
     footer {
       text-align: center;
-      margin-top: 50px;
+      margin-top: 20px;
       padding: 20px;
       color: #777;
       font-size: 14px;
@@ -183,7 +220,7 @@ $menuList = $_SESSION['menu'];
     <div class="logo">
       <img src="logo_kuliner_pak_dut.png" alt="Logo Dapur Pak Ndut">
       Dapur Kuliner Pak Ndut
-    
+    </div>
   </header>
 
   <main>
@@ -201,6 +238,12 @@ $menuList = $_SESSION['menu'];
           </form>
         </div>
       <?php endforeach; ?>
+    </div>
+
+    <div class="footer-btn">
+      <a href="index.php" class="back-btn">
+        <span class="arrow">⬅</span> Kembali ke Beranda
+      </a>
     </div>
   </main>
 
