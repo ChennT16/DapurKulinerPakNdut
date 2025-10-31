@@ -240,10 +240,6 @@
                     <p>+62 853-3569-6918<br>Senin - Minggu: 08.00 - 22.00 WIB</p>
                 </div>
                 <div class="info-box">
-                    <h4>📧 Email</h4>
-                    <p>info@dapurpakndut.com<br>order@dapurpakndut.com</p>
-                </div>
-                <div class="info-box">
                     <h4>💬 Media Sosial</h4>
                     <p>Instagram: @pentolbakar.pakndut<br>Tiktok: pentolbakar.pakndut</p>
                 </div>
@@ -272,8 +268,43 @@
     <footer>
         <p>&copy; 2025 Kuliner Dapur Pak Ndut - UMKM Kuliner Terbaik. Semua Hak Dilindungi.</p>
     </footer>
-
     
+    <!-- Modal Pemesanan -->
+    <div id="orderModal">
+        <div class="modal-order-container">
+            <!-- Header Modal -->
+            <div class="modal-order-header">
+                <h2>🛒 Pemesanan Menu</h2>
+                <button class="modal-close-btn" onclick="closeOrderModal()">×</button>
+            </div>
+
+            <!-- Body Modal -->
+            <div class="modal-order-body">
+                <!-- Section Menu Kiri -->
+                <div class="modal-menu-section">
+                    <!-- Tombol Filter Kategori -->
+                    <div class="modal-kategori-buttons">
+                        <button class="modal-kategori-btn active" onclick="filterModalKategori('Semua')">Semua</button>
+                        <button class="modal-kategori-btn" onclick="filterModalKategori('Pentol')">Pentol & Gorengan</button>
+                        <button class="modal-kategori-btn" onclick="filterModalKategori('Nasi Bento')">Nasi Bento</button>
+                        <button class="modal-kategori-btn" onclick="filterModalKategori('Minuman')">Minuman</button>
+                    </div>
+                    <!-- Grid Menu -->
+                    <div class="modal-menu-grid" id="modalMenuGrid">
+                        <!-- Menu akan ditampilkan di sini oleh JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Section Keranjang Kanan -->
+                <div class="modal-cart-section">
+                    <h3>🛒 Keranjang</h3>
+                    <div id="modalCartContent">
+                        <div class="modal-cart-empty">Keranjang masih kosong</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
 
