@@ -1,45 +1,55 @@
 <?php
-session_start();
 
-// Data menu
-if (!isset($_SESSION['menu'])) {
-  $_SESSION['menu'] = [
-    ["id"=>1, "nama"=>"Pentol Tahu", "stok"=>10, "gambar"=>"PENTOL TAHU.jpg"],
-    ["id"=>2, "nama"=>"Pentol Bakar", "stok"=>12, "gambar"=>"PENTOL BAKAR.jpg"],
-    ["id"=>3, "nama"=>"Pentol", "stok"=>8, "gambar"=>"PENTOL.jpg"],
-    ["id"=>4, "nama"=>"Rica - rica Balungan", "stok"=>6, "gambar"=>"RICA RICA BALUNGAN.jpg"],
-    ["id"=>5, "nama"=>"Nasi Bento Ati Ampela", "stok"=>9, "gambar"=>"NASI BENTO ATI AMPELA (1).jpg"],
-    ["id"=>6, "nama"=>"Nasi Bento Ayam Crispy", "stok"=>11, "gambar"=>"NASI BENTO AYAM CRISPY.jpg"],
-    ["id"=>7, "nama"=>"Nasi Bento Daging dan Sosis", "stok"=>10, "gambar"=>"NASI BENTO DAGING DAN SOSIS.jpg"],
-    ["id"=>8, "nama"=>"Nasi Bento Geprek", "stok"=>13, "gambar"=>"NASI BENTO GEPREK.jpg"],
-    ["id"=>9, "nama"=>"Nasi Bento Katsu", "stok"=>7, "gambar"=>"NASI BENTO KATSU.jpg"],
-    ["id"=>10,"nama"=>"Nasi Bento Rica - Rica Balungan", "stok"=>5, "gambar"=>"NASI BENTO RICA RICA BALUNGAN.jpg"],
-    ["id"=>11,"nama"=>"Tahu Bakar", "stok"=>8, "gambar"=>"TAHU BAKAR.jpg"],
-    ["id"=>12,"nama"=>"Gorengan Pangsit", "stok"=>6, "gambar"=>"GORENGAN PANGSIT.jpg"],
-    ["id"=>13,"nama"=>"Es Kuwut", "stok"=>9, "gambar"=>"ES KUWUT.jpg"],
-    ["id"=>14,"nama"=>"Es Rasa - Rasa", "stok"=>10, "gambar"=>"ES RASA RASA.jpg"],
-    ["id"=>15,"nama"=>"Air Mineral", "stok"=>7, "gambar"=>"AIR MINERAL.jpg"],
-    ["id"=>16,"nama"=>"Lemon Tea", "stok"=>12, "gambar"=>"LEMON TEA.jpg"],
-    ["id"=>17,"nama"=>"Susu Kedelai", "stok"=>8, "gambar"=>"SUSU KEDELAI.jpg"],
-    ["id"=>18,"nama"=>"Es Teh", "stok"=>8, "gambar"=>"ES TEH.jpg"],
-  ];
+
+// ========== KONEKSI DATABASE ==========
+// Ganti dengan file koneksi Anda
+include 'koneksi.php'; 
+
+// ATAU jika belum punya, gunakan ini:
+/*
+$host = 'localhost';
+$user = 'root';
+$pass = '';
+$db = 'dapur_pak_ndut';
+
+$conn = new mysqli($host, $user, $pass, $db);
+
+if ($conn->connect_error) {
+  die("Koneksi gagal: " . $conn->connect_error);
 }
+*/
+// ======================================
 
-// Update stok
+// Update stok dari form
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $id = $_POST['id'];
+  $id = $_POST['id_menu'];
   $action = $_POST['action'];
-  foreach ($_SESSION['menu'] as &$m) {
-    if ($m['id'] == $id) {
-      if ($action === 'plus') $m['stok']++;
-      if ($action === 'minus' && $m['stok'] > 0) $m['stok']--;
-    }
+  
+  if ($action === 'plus') {
+    $sql = "UPDATE menu SET stock_menu = stock_menu + 1 WHERE stock_menu = ?";
+  } elseif ($action === 'minus') {
+    $sql = "UPDATE menu SET stock_menu = stock_menu - 1 WHERE stock_menu = ? AND stock_menu > 0";
   }
+  
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param("stock_menu", $id);
+  $stmt->execute();
+  $stmt->close();
+  
   header("Location: ".$_SERVER['PHP_SELF']);
   exit;
 }
 
-$menuList = $_SESSION['menu'];
+// Ambil data menu dari database
+$sql = "SELECT id_menu,nama_menu,harga_menu,jenis_menu,stock_menu,id_produksi FROM menu ORDER BY stock_menu ASC";
+$result = $conn->query($sql);
+
+$menuList = [];
+if ($result->num_rows > 0) {
+  while($row = $result->fetch_assoc()) {
+    $menuList[] = $row;
+  }
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -227,11 +237,11 @@ $menuList = $_SESSION['menu'];
     <div class="menu-grid">
       <?php foreach ($menuList as $m): ?>
         <div class="card">
-          <img src="<?= $m['gambar'] ?>" alt="<?= $m['nama'] ?>">
-          <h3><?= $m['nama'] ?></h3>
-          <div class="stok">Stok: <?= $m['stok'] ?></div>
+          <img src="<?= htmlspecialchars($m['gambar']) ?>" alt="<?= htmlspecialchars($m['nama']) ?>">
+          <h3><?= htmlspecialchars($m['nama_menu']) ?></h3>
+          <div class="stok">Stock: <?= $m['stock_menu'] ?></div>
           <form method="POST">
-            <input type="hidden" name="id" value="<?= $m['id'] ?>">
+            <input type="hidden" name="id_menu" value="<?= $m['id_menu'] ?>">
             <button type="submit" name="action" value="plus">+</button>
             <button type="submit" name="action" value="minus">−</button>
           </form>
@@ -240,7 +250,7 @@ $menuList = $_SESSION['menu'];
     </div>
 
     <div class="footer-btn">
-      <a href="index.php" class="back-btn">
+      <a href="index.html" class="back-btn">
         <span class="arrow">⬅</span> Kembali ke Beranda
       </a>
     </div>
@@ -249,5 +259,24 @@ $menuList = $_SESSION['menu'];
   <footer>
     © 2025 Dapur Pak Ndut | Semua hak dilindungi
   </footer>
+
+  <script>
+    // Simpan posisi scroll sebelum halaman reload
+    document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('submit', function() {
+        sessionStorage.setItem('scrollPos', window.scrollY);
+      });
+    });
+
+    // Kembalikan posisi scroll setelah halaman selesai dimuat
+    window.addEventListener('load', function() {
+      const scrollPos = sessionStorage.getItem('scrollPos');
+      if (scrollPos) {
+        window.scrollTo(0, parseInt(scrollPos));
+        sessionStorage.removeItem('scrollPos');
+      }
+    });
+  </script>
+
 </body>
 </html>
