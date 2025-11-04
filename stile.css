@@ -110,94 +110,18 @@
         }
 
         /* Hero Section */
-        #beranda {
-            margin-top: 90px;
-            background: linear-gradient(135deg, #FFA726 0%, #FF9800 100%);
-            padding: 100px 5%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            min-height: 600px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        #beranda::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -10%;
-            width: 600px;
-            height: 600px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-30px) rotate(5deg); }
-        }
-
-        .hero-content {
-            flex: 1;
-            z-index: 1;
-            animation: slideInLeft 1s ease;
-        }
-
-        @keyframes slideInLeft {
-            from { opacity: 0; transform: translateX(-50px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        .hero-content h1 {
-            font-family: "Chewy", cursive;
-            font-size: 70px;
-            color: rgb(255, 255, 255);
-            margin-bottom: 20px;
-            line-height: 1.2;
-        }
-
-        .hero-content p {
-            font-family: "Lato", sans-serif;
-            font-size: 30px;
-            color: rgba(255,255,255,0.95);
-            margin-bottom: 30px;
-            line-height: 1.6;
-        }
-
-        .cta-button {
-            display: inline-block;
-            padding: 18px 40px;
-            background: white;
-            color: #FF9800;
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: bold;
-            font-size: 18px;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .cta-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-            background: #FFF3E0;
-        }
-
-        .hero-image {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            z-index: 1;
-            animation: slideInRight 1s ease;
-        }
-
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(50px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
+      #beranda {
+    margin-top: 90px;
+    background-image: url("img/BANNER PAK NDUT TERBARU.jpg");
+    background-size: cover;
+    background-position: center;
+    min-height: 800px; min-width: 900px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
         
 
         /* Sections */
@@ -491,6 +415,7 @@
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             animation: fadeInRight 1s ease;
+            text-align: left;
         }
 
         .form-group {
