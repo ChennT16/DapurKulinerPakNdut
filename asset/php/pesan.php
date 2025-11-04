@@ -450,7 +450,7 @@
             { id: 5, name: 'Nasi Bento Ayam Katsu', price: 10000, category: 'Nasi Bento', image: 'img/NASI BENTO KATSU.jpg' },
             { id: 6, name: 'Nasi Bento Ayam Crispy', price: 10000, category: 'Nasi Bento', image: 'img/NASI BENTO AYAM CRISPY.jpg' },
             { id: 7, name: 'Nasi Bento Ayam Geprek', price: 10000, category: 'Nasi Bento', image: 'img/NASI BENTO GEPREK.jpg' },
-            { id: 8, name: 'Nasi Beff & Sosis', price: 10000, category: 'Nasi Bento', image: 'img/NASI BENTO DAGING DAN SOSIS.jpg' },
+            { id: 8, name: 'Nasi Bento Beff & Sosis', price: 10000, category: 'Nasi Bento', image: 'img/NASI BENTO DAGING DAN SOSIS.jpg' },
             { id: 9, name: 'Nasi Bento Rica-Rica Balungan', price: 8000, category: 'Nasi Bento', image: 'img/NASI BENTO RICA RICA BALUNGAN.jpg' },
             { id: 10, name: 'Nasi Bento Ati Ampela', price: 8000, category: 'Nasi Bento', image: 'img/NASI BENTO ATI AMPELA (1).jpg' },
             
