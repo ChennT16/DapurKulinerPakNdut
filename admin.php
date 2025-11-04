@@ -329,32 +329,6 @@
             transform: translateY(-2px);
         }
 
-        .pagination {
-            margin-top: 25px;
-            justify-content: center;
-        }
-
-        .pagination .page-link {
-            border: 2px solid #e5e7eb;
-            color: var(--primary-orange);
-            padding: 10px 18px;
-            margin: 0 5px;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .pagination .page-link:hover {
-            background: var(--primary-orange);
-            border-color: var(--primary-orange);
-            color: white;
-        }
-
-        .pagination .page-item.active .page-link {
-            background: var(--primary-orange);
-            border-color: var(--primary-orange);
-        }
-
         /* Modal Styles */
         .modal-content {
             border-radius: 20px;
@@ -671,25 +645,6 @@
                     </tbody>
                 </table>
             </div>
-
-            <!-- Pagination -->
-            <nav aria-label="Page navigation">
-                <ul class="pagination">
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1">
-                            <i class="fas fa-chevron-left"></i>
-                        </a>
-                    </li>
-                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">
-                            <i class="fas fa-chevron-right"></i>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
         </div>
     </div>
 
@@ -789,7 +744,8 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">No. Telepon</label>
-                                <input type="tel" class="</div>
+                                <input type="tel" class="form-control" value="081234567890">
+                            </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -829,41 +785,4 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function searchTable() {
-            const input = document.getElementById('searchInput');
-            const filter = input.value.toLowerCase();
-            const table = document.getElementById('adminTable');
-            const tr = table.getElementsByTagName('tr');
-            for (let i = 1; i < tr.length; i++) {
-                const tdName = tr[i].getElementsByTagName('td')[1];
-                if (tdName) {
-                    const txtValue = tdName.textContent || tdName.innerText;
-                    tr[i].style.display = txtValue.toLowerCase().indexOf(filter) > -1 ? '' : 'none';
-                }
-            }
-        }
-
-        function filterTable() {
-            const roleFilter = document.getElementById('roleFilter').value;
-            const statusFilter = document.getElementById('statusFilter').value;
-            const table = document.getElementById('adminTable');
-            const tr = table.getElementsByTagName('tr');
-            for (let i = 1; i < tr.length; i++) {
-                const tdRole = tr[i].getElementsByTagName('td')[4];
-                const tdStatus = tr[i].getElementsByTagName('td')[5];
-                let showRole = !roleFilter || (tdRole && (tdRole.textContent || tdRole.innerText).indexOf(roleFilter) > -1);
-                let showStatus = !statusFilter || (tdStatus && (tdStatus.textContent || tdStatus.innerText).indexOf(statusFilter) > -1);
-                tr[i].style.display = (showRole && showStatus) ? '' : 'none';
-            }
-        }
-
-        function confirmDelete(name) {
-            if (confirm('Apakah Anda yakin ingin menghapus admin "' + name + '"?')) {
-                alert('Admin "' + name + '" berhasil dihapus!');
-            }
-        }
-    </script>
-</body>
-</html>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3
