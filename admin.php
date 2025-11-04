@@ -429,7 +429,7 @@
                 <i class="fas fa-user-shield"></i>
                 <span>Data Admin</span>
             </a>
-            <a class="nav-link" href="#menu">
+            <a class="nav-link" href="pendataan_menu.php">
                 <i class="fas fa-book"></i>
                 <span>Menu</span>
             </a>
