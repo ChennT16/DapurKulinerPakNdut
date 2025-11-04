@@ -3,9 +3,9 @@ $servername = "localhost";
 $username = "root";
 $password = "";
 $database = "umkm"; // pastikan nama database kamu benar
-$port =8111 ;
+$port = 3306;
 // Membuat koneksi
-$conn = mysqli_connect($servername, $username, $password, $database,$port);
+$conn = mysqli_connect($servername, $username, $password, $database, $port);
 
 
 ?>
