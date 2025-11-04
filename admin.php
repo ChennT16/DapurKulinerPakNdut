@@ -421,11 +421,11 @@
             <span>Dapur Kuliner<br>Pak Ndut</span>
         </div>
         <nav class="nav flex-column mt-3">
-            <a class="nav-link" href="#dashboard">
+            <a class="nav-link" href="admin.php">
                 <i class="fas fa-home"></i>
                 <span>Dashboard Admin</span>
             </a>
-            <a class="nav-link active" href="#admin">
+            <a class="nav-link active" href="...">
                 <i class="fas fa-user-shield"></i>
                 <span>Data Admin</span>
             </a>
@@ -433,15 +433,15 @@
                 <i class="fas fa-book"></i>
                 <span>Menu</span>
             </a>
-            <a class="nav-link" href="#transaksi">
+            <a class="nav-link" href="data_transaksi.php">
                 <i class="fas fa-shopping-cart"></i>
                 <span>Transaksi</span>
             </a>
-            <a class="nav-link" href="#laporan">
+            <a class="nav-link" href="generate_laporan.php">
                 <i class="fas fa-file-alt"></i>
                 <span>Generate Laporan</span>
             </a>
-            <a class="nav-link" href="#logout">
+            <a class="nav-link" href="login.php">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Logout</span>
             </a>

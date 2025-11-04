@@ -411,6 +411,17 @@
             background: #d0d0d0;
         }
 
+        .image-preview {
+            width: 100%;
+            max-width: 200px;
+            height: 200px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-top: 10px;
+            border: 2px solid #e0e0e0;
+            display: none;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
@@ -516,6 +527,7 @@
             </div>
             <form id="menuForm" onsubmit="saveMenu(event)">
                 <input type="hidden" id="menuId">
+                <input type="hidden" id="existingImage">
                 
                 <div class="form-group">
                     <label>Nama Menu *</label>
@@ -538,8 +550,9 @@
                 </div>
 
                 <div class="form-group">
-                    <label>URL Gambar</label>
-                    <input type="text" id="menuImage" placeholder="img/menu.jpg">
+                    <label>Upload Gambar <span id="imageRequired">(Wajib)</span></label>
+                    <input type="file" id="menuImage" accept="image/*" onchange="previewImage(event)">
+                    <img id="imagePreview" class="image-preview" alt="Preview">
                 </div>
 
                 <div class="modal-buttons">
@@ -551,20 +564,22 @@
     </div>
 
     <script>
-        let menuData = [
+        let menuData = [];
+        let editingId = null;
+
+        // Inisialisasi data default
+        const defaultMenuData = [
             { id: 1, name: 'Pentol', price: 5000, category: 'Pentol', image: 'img/PENTOL.jpg' },
             { id: 2, name: 'Pentol Tahu', price: 5000, category: 'Pentol', image: 'img/PENTOL TAHU.jpg' },
             { id: 3, name: 'Pentol Bakar', price: 1000, category: 'Pentol', image: 'img/PENTOL BAKAR.jpg' },
             { id: 4, name: 'Tahu Bakar', price: 1000, category: 'Pentol', image: 'img/TAHU BAKAR.jpg' },
             { id: 11, name: 'Gorengan Pangsit', price: 1000, category: 'Pentol', image: 'img/GORENGAN PANGSIT.jpg' },
-            
             { id: 5, name: 'Nasi Bento Ayam Katsu', price: 10000, category: 'Nasi Bento', image: 'img/NASI BENTO KATSU.jpg' },
             { id: 6, name: 'Nasi Bento Ayam Crispy', price: 10000, category: 'Nasi Bento', image: 'img/NASI BENTO AYAM CRISPY.jpg' },
             { id: 7, name: 'Nasi Bento Ayam Geprek', price: 10000, category: 'Nasi Bento', image: 'img/NASI BENTO GEPREK.jpg' },
             { id: 8, name: 'Nasi Bento Beff & Sosis', price: 10000, category: 'Nasi Bento', image: 'img/NASI BENTO DAGING DAN SOSIS.jpg' },
             { id: 9, name: 'Nasi Bento Rica-Rica Balungan', price: 8000, category: 'Nasi Bento', image: 'img/NASI BENTO RICA RICA BALUNGAN.jpg' },
             { id: 10, name: 'Nasi Bento Ati Ampela', price: 8000, category: 'Nasi Bento', image: 'img/NASI BENTO ATI AMPELA (1).jpg' },
-            
             { id: 12, name: 'Susu Kedelai', price: 6000, category: 'Minuman', image: 'img/SUSU KEDELAI.jpg' },
             { id: 13, name: 'Es Kuwut', price: 3000, category: 'Minuman', image: 'img/ES KUWUT.jpg' },
             { id: 14, name: 'Es Rasa Rasa', price: 3000, category: 'Minuman', image: 'img/ES RASA RASA.jpg' },
@@ -573,7 +588,31 @@
             { id: 17, name: 'Air Mineral', price: 3000, category: 'Minuman', image: 'img/AIR MINERAL.jpg' }
         ];
 
-        let editingId = null;
+        // Load data dari storage
+        async function loadData() {
+            try {
+                const result = await window.storage.get('menuData');
+                if (result && result.value) {
+                    menuData = JSON.parse(result.value);
+                } else {
+                    menuData = defaultMenuData;
+                    await saveData();
+                }
+            } catch (error) {
+                console.log('Storage tidak tersedia, menggunakan data default');
+                menuData = defaultMenuData;
+            }
+            displayMenu();
+        }
+
+        // Simpan data ke storage
+        async function saveData() {
+            try {
+                await window.storage.set('menuData', JSON.stringify(menuData));
+            } catch (error) {
+                console.error('Gagal menyimpan data:', error);
+            }
+        }
 
         function formatRupiah(amount) {
             return 'Rp ' + amount.toLocaleString('id-ID');
@@ -642,9 +681,26 @@
             displayMenu(filtered);
         }
 
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('imagePreview');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
         function openModal(id = null) {
             const modal = document.getElementById('menuModal');
             const modalTitle = document.getElementById('modalTitle');
+            const imageInput = document.getElementById('menuImage');
+            const imageRequired = document.getElementById('imageRequired');
+            const preview = document.getElementById('imagePreview');
             
             if (id) {
                 editingId = id;
@@ -654,11 +710,24 @@
                 document.getElementById('menuName').value = menu.name;
                 document.getElementById('menuCategory').value = menu.category;
                 document.getElementById('menuPrice').value = menu.price;
-                document.getElementById('menuImage').value = menu.image;
+                document.getElementById('existingImage').value = menu.image;
+                
+                // Preview gambar yang ada
+                preview.src = menu.image;
+                preview.style.display = 'block';
+                
+                // Tidak wajib upload gambar saat edit
+                imageInput.removeAttribute('required');
+                imageRequired.textContent = '(Opsional)';
             } else {
                 editingId = null;
                 modalTitle.textContent = 'Tambah Menu Baru';
                 document.getElementById('menuForm').reset();
+                preview.style.display = 'none';
+                
+                // Wajib upload gambar saat tambah baru
+                imageInput.setAttribute('required', 'required');
+                imageRequired.textContent = '(Wajib)';
             }
             
             modal.classList.add('active');
@@ -668,39 +737,48 @@
             const modal = document.getElementById('menuModal');
             modal.classList.remove('active');
             document.getElementById('menuForm').reset();
+            document.getElementById('imagePreview').style.display = 'none';
             editingId = null;
         }
 
-        function saveMenu(event) {
+        async function saveMenu(event) {
             event.preventDefault();
 
             const name = document.getElementById('menuName').value;
             const category = document.getElementById('menuCategory').value;
             const price = parseInt(document.getElementById('menuPrice').value);
-            const image = document.getElementById('menuImage').value || 'img/default.jpg';
+            const fileInput = document.getElementById('menuImage');
+            
+            let image = document.getElementById('existingImage').value || 'img/default.jpg';
 
+            // Jika ada file baru yang diupload
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = async function(e) {
+                    image = e.target.result;
+                    await saveMenuData(name, category, price, image);
+                };
+                
+                reader.readAsDataURL(file);
+            } else {
+                await saveMenuData(name, category, price, image);
+            }
+        }
+
+        async function saveMenuData(name, category, price, image) {
             if (editingId) {
                 const index = menuData.findIndex(m => m.id === editingId);
-                menuData[index] = {
-                    ...menuData[index],
-                    name,
-                    category,
-                    price,
-                    image
-                };
+                menuData[index] = { ...menuData[index], name, category, price, image };
                 alert('Menu berhasil diupdate!');
             } else {
-                const newId = Math.max(...menuData.map(m => m.id)) + 1;
-                menuData.push({
-                    id: newId,
-                    name,
-                    category,
-                    price,
-                    image
-                });
+                const newId = menuData.length > 0 ? Math.max(...menuData.map(m => m.id)) + 1 : 1;
+                menuData.push({ id: newId, name, category, price, image });
                 alert('Menu berhasil ditambahkan!');
             }
 
+            await saveData();
             closeModal();
             displayMenu();
             filterMenu();
@@ -710,9 +788,10 @@
             openModal(id);
         }
 
-        function deleteMenu(id) {
+        async function deleteMenu(id) {
             if (confirm('Apakah Anda yakin ingin menghapus menu ini?')) {
                 menuData = menuData.filter(item => item.id !== id);
+                await saveData();
                 displayMenu();
                 filterMenu();
                 alert('Menu berhasil dihapus!');
@@ -732,7 +811,7 @@
         }
 
         // Initialize
-        displayMenu();
+        loadData();
     </script>
 </body>
 </html>
