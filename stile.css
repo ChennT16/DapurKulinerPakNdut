@@ -356,7 +356,7 @@
             justify-content: center;
             font-size: 150px;
             box-shadow: 0 20px 60px rgba(255, 152, 0, 0.3);
-            animation: pulse 3s infinite;
+            animation: pulse 7s infinite;
         }
 
         @keyframes pulse {
