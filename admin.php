@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
         ':password' => $password
     ]);
     
-    header("Location: data_admin.php?success=tambah");
+    header("Location: admin.php?success=tambah");
     exit;
 }
 
@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
         ]);
     }
     
-    header("Location: data_admin.php?success=edit");
+    header("Location: admin.php?success=edit");
     exit;
 }
 
@@ -77,7 +77,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'hapus' && isset($_GET['id'])) 
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':id' => $id]);
     
-    header("Location: data_admin.php?success=hapus");
+    header("Location: admin.php?success=hapus");
     exit;
 }
 
@@ -377,7 +377,7 @@ $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <a class="nav-link" href="admin.php">
                 <i class="fas fa-home"></i>Dashboard Admin
             </a>
-            <a class="nav-link active" href="data_admin.php">
+            <a class="nav-link active" href="admin.php">
                 <i class="fas fa-user-shield"></i>Data Admin
             </a>
             <a class="nav-link" href="pendataan_menu.php">
@@ -652,7 +652,7 @@ $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = `data_admin.php?action=hapus&id=${id}`;
+                    window.location.href = `admin.php?action=hapus&id=${id}`;
                 }
             });
         }
