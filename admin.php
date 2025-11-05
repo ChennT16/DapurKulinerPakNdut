@@ -1,3 +1,104 @@
+<?php
+// Koneksi Database
+$host = 'localhost';
+$dbname = 'umkm';
+$username = 'root';
+$password = '';
+
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch(PDOException $e) {
+    die("Koneksi gagal: " . $e->getMessage());
+}
+
+// Handle Tambah Admin
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'tambah') {
+    $nama = $_POST['nama'];
+    $username = $_POST['username'];
+    $email = $_POST['email'];
+    $telepon = $_POST['telepon'];
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    
+    $sql = "INSERT INTO admin (nama, username, email, telepon, password) VALUES (:nama, :username, :email, :telepon, :password)";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        ':nama' => $nama,
+        ':username' => $username,
+        ':email' => $email,
+        ':telepon' => $telepon,
+        ':password' => $password
+    ]);
+    
+    header("Location: data_admin.php?success=tambah");
+    exit;
+}
+
+// Handle Edit Admin
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'edit') {
+    $id = $_POST['id'];
+    $nama = $_POST['nama'];
+    $username = $_POST['username'];
+    $email = $_POST['email'];
+    $telepon = $_POST['telepon'];
+    
+    if (!empty($_POST['password'])) {
+        $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+        $sql = "UPDATE admin SET nama=:nama, username=:username, email=:email, telepon=:telepon, password=:password WHERE id=:id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':id' => $id,
+            ':nama' => $nama,
+            ':username' => $username,
+            ':email' => $email,
+            ':telepon' => $telepon,
+            ':password' => $password
+        ]);
+    } else {
+        $sql = "UPDATE admin SET nama=:nama, username=:username, email=:email, telepon=:telepon WHERE id=:id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':id' => $id,
+            ':nama' => $nama,
+            ':username' => $username,
+            ':email' => $email,
+            ':telepon' => $telepon
+        ]);
+    }
+    
+    header("Location: data_admin.php?success=edit");
+    exit;
+}
+
+// Handle Hapus Admin
+if (isset($_GET['action']) && $_GET['action'] == 'hapus' && isset($_GET['id'])) {
+    $id = $_GET['id'];
+    $sql = "DELETE FROM admin WHERE id = :id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([':id' => $id]);
+    
+    header("Location: data_admin.php?success=hapus");
+    exit;
+}
+
+// Ambil data admin dengan filter
+$search = isset($_GET['search']) ? $_GET['search'] : '';
+
+$sql = "SELECT * FROM admin WHERE 1=1";
+$params = [];
+
+if (!empty($search)) {
+    $sql .= " AND (nama LIKE :search OR username LIKE :search OR email LIKE :search)";
+    $params[':search'] = "%$search%";
+}
+
+$sql .= " ORDER BY id DESC";
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -24,7 +125,6 @@
             background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
         .sidebar {
@@ -44,7 +144,6 @@
             font-size: 1.3rem;
             font-weight: bold;
             background: rgba(0,0,0,0.2);
-            border-bottom: 2px solid rgba(255,255,255,0.1);
         }
 
         .sidebar .logo i {
@@ -59,14 +158,11 @@
             margin: 5px 15px;
             border-radius: 10px;
             transition: all 0.3s;
-            display: flex;
-            align-items: center;
         }
 
         .sidebar .nav-link:hover {
             background: rgba(255,255,255,0.1);
             color: white;
-            transform: translateX(5px);
         }
 
         .sidebar .nav-link.active {
@@ -77,7 +173,6 @@
 
         .sidebar .nav-link i {
             margin-right: 10px;
-            font-size: 1.1rem;
         }
 
         .main-content {
@@ -96,19 +191,6 @@
             align-items: center;
         }
 
-        .page-header h2 {
-            margin: 0;
-            color: var(--dark-orange);
-            font-weight: 700;
-        }
-
-        .page-header .breadcrumb {
-            background: none;
-            margin: 5px 0 0 0;
-            padding: 0;
-            font-size: 0.9rem;
-        }
-
         .btn-add {
             background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange));
             color: white;
@@ -117,12 +199,11 @@
             border-radius: 12px;
             font-weight: 600;
             transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);
         }
 
         .btn-add:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(255, 140, 0, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 140, 0, 0.4);
             color: white;
         }
 
@@ -133,16 +214,9 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.1);
         }
 
-        .search-filter {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-
         .search-box {
-            flex: 1;
-            min-width: 250px;
+            position: relative;
+            margin-bottom: 25px;
         }
 
         .search-box input {
@@ -151,10 +225,6 @@
             padding: 12px 20px 12px 45px;
             width: 100%;
             transition: all 0.3s;
-        }
-
-        .search-box {
-            position: relative;
         }
 
         .search-box i {
@@ -166,19 +236,6 @@
         }
 
         .search-box input:focus {
-            outline: none;
-            border-color: var(--primary-orange);
-            box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.1);
-        }
-
-        .filter-select {
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 12px 20px;
-            transition: all 0.3s;
-        }
-
-        .filter-select:focus {
             outline: none;
             border-color: var(--primary-orange);
             box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.1);
@@ -204,7 +261,6 @@
             font-weight: 600;
             text-transform: uppercase;
             font-size: 0.85rem;
-            letter-spacing: 0.5px;
         }
 
         .table tbody tr {
@@ -214,7 +270,6 @@
 
         .table tbody tr:hover {
             background: rgba(255, 140, 0, 0.05);
-            transform: scale(1.01);
         }
 
         .table tbody td {
@@ -233,7 +288,6 @@
             justify-content: center;
             font-weight: bold;
             font-size: 1.2rem;
-            box-shadow: 0 4px 10px rgba(255, 140, 0, 0.3);
         }
 
         .admin-info {
@@ -242,58 +296,13 @@
             gap: 15px;
         }
 
-        .admin-name {
-            font-weight: 600;
-            color: #1f2937;
-            margin: 0;
-        }
-
-        .admin-username {
-            font-size: 0.85rem;
-            color: #6b7280;
-            margin: 0;
-        }
-
-        .badge-role {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.8rem;
-        }
-
-        .badge-super-admin {
-            background: linear-gradient(135deg, #F59E0B, #FBBF24);
-            color: white;
-        }
-
-        .badge-admin {
-            background: linear-gradient(135deg, #3B82F6, #60A5FA);
-            color: white;
-        }
-
-        .badge-status {
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.8rem;
-        }
-
-        .badge-aktif {
-            background: #D1FAE5;
-            color: #065F46;
-        }
-
-        .badge-nonaktif {
-            background: #FEE2E2;
-            color: #991B1B;
-        }
-
         .btn-action {
             padding: 8px 12px;
             border: none;
             border-radius: 8px;
             transition: all 0.3s;
             margin: 0 3px;
+            cursor: pointer;
         }
 
         .btn-edit {
@@ -318,37 +327,15 @@
             transform: translateY(-2px);
         }
 
-        .btn-view {
-            background: #FFE5CC;
-            color: #CC6600;
-        }
-
-        .btn-view:hover {
-            background: var(--primary-orange);
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        /* Modal Styles */
-        .modal-content {
-            border-radius: 20px;
-            border: none;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-        }
-
         .modal-header {
             background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange));
             color: white;
             border-radius: 20px 20px 0 0;
-            padding: 20px 30px;
         }
 
-        .modal-header .btn-close {
-            filter: brightness(0) invert(1);
-        }
-
-        .modal-body {
-            padding: 30px;
+        .modal-content {
+            border-radius: 20px;
+            border: none;
         }
 
         .form-label {
@@ -357,59 +344,25 @@
             margin-bottom: 8px;
         }
 
-        .form-control, .form-select {
+        .form-control {
             border: 2px solid #e5e7eb;
             border-radius: 10px;
             padding: 12px 15px;
             transition: all 0.3s;
         }
 
-        .form-control:focus, .form-select:focus {
+        .form-control:focus {
             border-color: var(--primary-orange);
             box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.1);
         }
 
-        .btn-save {
-            background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange));
-            color: white;
-            padding: 12px 30px;
-            border-radius: 10px;
-            border: none;
-            font-weight: 600;
-            transition: all 0.3s;
+        .alert {
+            border-radius: 12px;
+            margin-bottom: 20px;
         }
 
-        .btn-save:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 140, 0, 0.4);
-            color: white;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 70px;
-            }
-
-            .sidebar .logo span {
-                display: none;
-            }
-
-            .sidebar .nav-link span {
-                display: none;
-            }
-
-            .main-content {
-                margin-left: 70px;
-                padding: 15px;
-            }
-
-            .search-filter {
-                flex-direction: column;
-            }
-
-            .search-box {
-                width: 100%;
-            }
+        .avatar-colors {
+            display: inline-block;
         }
     </style>
 </head>
@@ -422,226 +375,114 @@
         </div>
         <nav class="nav flex-column mt-3">
             <a class="nav-link" href="admin.php">
-                <i class="fas fa-home"></i>
-                <span>Dashboard Admin</span>
+                <i class="fas fa-home"></i>Dashboard Admin
             </a>
-            <a class="nav-link active" href="...">
-                <i class="fas fa-user-shield"></i>
-                <span>Data Admin</span>
+            <a class="nav-link active" href="data_admin.php">
+                <i class="fas fa-user-shield"></i>Data Admin
             </a>
             <a class="nav-link" href="pendataan_menu.php">
-                <i class="fas fa-book"></i>
-                <span>Menu</span>
+                <i class="fas fa-book"></i>Menu
             </a>
             <a class="nav-link" href="data_transaksi.php">
-                <i class="fas fa-shopping-cart"></i>
-                <span>Transaksi</span>
+                <i class="fas fa-shopping-cart"></i>Transaksi
             </a>
             <a class="nav-link" href="generate_laporan.php">
-                <i class="fas fa-file-alt"></i>
-                <span>Generate Laporan</span>
+                <i class="fas fa-file-alt"></i>Generate Laporan
             </a>
             <a class="nav-link" href="login.php">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Logout</span>
+                <i class="fas fa-sign-out-alt"></i>Logout
             </a>
         </nav>
     </div>
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Page Header -->
+        <?php if (isset($_GET['success'])): ?>
+            <div class="alert alert-success alert-dismissible fade show">
+                <?php 
+                    if ($_GET['success'] == 'tambah') echo '✓ Data admin berhasil ditambahkan!';
+                    if ($_GET['success'] == 'edit') echo '✓ Data admin berhasil diupdate!';
+                    if ($_GET['success'] == 'hapus') echo '✓ Data admin berhasil dihapus!';
+                ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php endif; ?>
+
         <div class="page-header">
             <div>
                 <h2><i class="fas fa-user-shield me-2"></i>Data Admin</h2>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="#" style="color: var(--primary-orange)">Dashboard</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Data Admin</li>
-                    </ol>
-                </nav>
             </div>
             <button class="btn btn-add" data-bs-toggle="modal" data-bs-target="#modalTambahAdmin">
                 <i class="fas fa-plus me-2"></i>Tambah Admin
             </button>
         </div>
 
-        <!-- Data Card -->
         <div class="data-card">
-            <!-- Search & Filter -->
-            <div class="search-filter">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="Cari nama admin atau username..." onkeyup="searchTable()">
-                </div>
-                <select class="filter-select" id="roleFilter" onchange="filterTable()">
-                    <option value="">Semua Role</option>
-                    <option value="Super Admin">Super Admin</option>
-                    <option value="Admin">Admin</option>
-                </select>
-                <select class="filter-select" id="statusFilter" onchange="filterTable()">
-                    <option value="">Semua Status</option>
-                    <option value="Aktif">Aktif</option>
-                    <option value="Nonaktif">Nonaktif</option>
-                </select>
-            </div>
+            <form method="GET" class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" name="search" placeholder="Cari nama admin atau username..." value="<?= htmlspecialchars($search) ?>" onchange="this.form.submit()">
+            </form>
 
-            <!-- Table -->
             <div class="table-responsive">
-                <table class="table" id="adminTable">
+                <table class="table">
                     <thead>
                         <tr>
                             <th>No</th>
                             <th>Admin</th>
                             <th>Email</th>
                             <th>No. Telepon</th>
-                            <th>Role</th>
-                            <th>Status</th>
-                            <th>Last Login</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>
-                                <div class="admin-info">
-                                    <div class="admin-avatar">A</div>
-                                    <div>
-                                        <p class="admin-name">Ahmad Fauzi</p>
-                                        <p class="admin-username">@ahmadfauzi</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>ahmad@dapurpakundut.com</td>
-                            <td>081234567890</td>
-                            <td><span class="badge-role badge-super-admin">Super Admin</span></td>
-                            <td><span class="badge-status badge-aktif">Aktif</span></td>
-                            <td>04 Nov 2025, 10:30</td>
-                            <td>
-                                <button class="btn-action btn-view" title="Lihat Detail">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn-action btn-edit" title="Edit" data-bs-toggle="modal" data-bs-target="#modalEditAdmin">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn-action btn-delete" title="Hapus" onclick="confirmDelete('Ahmad Fauzi')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>
-                                <div class="admin-info">
-                                    <div class="admin-avatar" style="background: linear-gradient(135deg, #EC4899, #F472B6);">S</div>
-                                    <div>
-                                        <p class="admin-name">Siti Nurhaliza</p>
-                                        <p class="admin-username">@sitinur</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>siti@dapurpakundut.com</td>
-                            <td>081234567891</td>
-                            <td><span class="badge-role badge-admin">Admin</span></td>
-                            <td><span class="badge-status badge-aktif">Aktif</span></td>
-                            <td>04 Nov 2025, 09:15</td>
-                            <td>
-                                <button class="btn-action btn-view" title="Lihat Detail">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn-action btn-edit" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn-action btn-delete" title="Hapus" onclick="confirmDelete('Siti Nurhaliza')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>
-                                <div class="admin-info">
-                                    <div class="admin-avatar" style="background: linear-gradient(135deg, #10B981, #34D399);">B</div>
-                                    <div>
-                                        <p class="admin-name">Budi Santoso</p>
-                                        <p class="admin-username">@budisantoso</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>budi@dapurpakundut.com</td>
-                            <td>081234567892</td>
-                            <td><span class="badge-role badge-admin">Admin</span></td>
-                            <td><span class="badge-status badge-aktif">Aktif</span></td>
-                            <td>03 Nov 2025, 16:45</td>
-                            <td>
-                                <button class="btn-action btn-view" title="Lihat Detail">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn-action btn-edit" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn-action btn-delete" title="Hapus" onclick="confirmDelete('Budi Santoso')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>4</td>
-                            <td>
-                                <div class="admin-info">
-                                    <div class="admin-avatar" style="background: linear-gradient(135deg, #F59E0B, #FBBF24);">D</div>
-                                    <div>
-                                        <p class="admin-name">Dewi Lestari</p>
-                                        <p class="admin-username">@dewilestari</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>dewi@dapurpakundut.com</td>
-                            <td>081234567893</td>
-                            <td><span class="badge-role badge-admin">Admin</span></td>
-                            <td><span class="badge-status badge-nonaktif">Nonaktif</span></td>
-                            <td>28 Oct 2025, 14:20</td>
-                            <td>
-                                <button class="btn-action btn-view" title="Lihat Detail">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn-action btn-edit" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn-action btn-delete" title="Hapus" onclick="confirmDelete('Dewi Lestari')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>5</td>
-                            <td>
-                                <div class="admin-info">
-                                    <div class="admin-avatar" style="background: linear-gradient(135deg, #EF4444, #F87171);">R</div>
-                                    <div>
-                                        <p class="admin-name">Rina Anggraeni</p>
-                                        <p class="admin-username">@rinaanggraeni</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>rina@dapurpakundut.com</td>
-                            <td>081234567894</td>
-                            <td><span class="badge-role badge-admin">Admin</span></td>
-                            <td><span class="badge-status badge-aktif">Aktif</span></td>
-                            <td>04 Nov 2025, 08:00</td>
-                            <td>
-                                <button class="btn-action btn-view" title="Lihat Detail">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn-action btn-edit" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn-action btn-delete" title="Hapus" onclick="confirmDelete('Rina Anggraeni')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
+                        <?php if (count($admins) > 0): ?>
+                            <?php 
+                                $no = 1; 
+                                $colors = [
+                                    'linear-gradient(135deg, #FF8C00, #FFA500)',
+                                    'linear-gradient(135deg, #EC4899, #F472B6)',
+                                    'linear-gradient(135deg, #10B981, #34D399)',
+                                    'linear-gradient(135deg, #F59E0B, #FBBF24)',
+                                    'linear-gradient(135deg, #EF4444, #F87171)',
+                                    'linear-gradient(135deg, #8B5CF6, #A78BFA)',
+                                    'linear-gradient(135deg, #06B6D4, #22D3EE)',
+                                ];
+                                foreach ($admins as $index => $admin): 
+                                    $colorIndex = $index % count($colors);
+                            ?>
+                                <tr>
+                                    <td><?= $no++ ?></td>
+                                    <td>
+                                        <div class="admin-info">
+                                            <div class="admin-avatar" style="background: <?= $colors[$colorIndex] ?>">
+                                                <?= strtoupper(substr($admin['nama'], 0, 1)) ?>
+                                            </div>
+                                            <div>
+                                                <p class="mb-0 fw-bold"><?= htmlspecialchars($admin['nama']) ?></p>
+                                                <small class="text-muted">@<?= htmlspecialchars($admin['username']) ?></small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><?= htmlspecialchars($admin['email']) ?></td>
+                                    <td><?= htmlspecialchars($admin['telepon']) ?></td>
+                                    <td>
+                                        <button class="btn-action btn-edit" onclick='editAdmin(<?= json_encode($admin) ?>)' title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn-action btn-delete" onclick="hapusAdmin(<?= $admin['id'] ?>, '<?= htmlspecialchars($admin['nama']) ?>')" title="Hapus">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">Tidak ada data admin</p>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -654,65 +495,49 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Tambah Admin Baru</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <form>
+                <form method="POST" onsubmit="return validateForm('tambah')">
+                    <input type="hidden" name="action" value="tambah">
+                    <div class="modal-body">
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Nama Lengkap</label>
-                                <input type="text" class="form-control" placeholder="Masukkan nama lengkap">
+                                <input type="text" class="form-control" name="nama" id="tambah_nama" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Username</label>
-                                <input type="text" class="form-control" placeholder="Masukkan username">
+                                <input type="text" class="form-control" name="username" id="tambah_username" required>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Email</label>
-                                <input type="email" class="form-control" placeholder="admin@example.com">
+                                <input type="email" class="form-control" name="email" id="tambah_email" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">No. Telepon</label>
-                                <input type="tel" class="form-control" placeholder="081234567890">
+                                <input type="tel" class="form-control" name="telepon" id="tambah_telepon" required>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Password</label>
-                                <input type="password" class="form-control" placeholder="Masukkan password">
+                                <input type="password" class="form-control" name="password" id="tambah_password" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Konfirmasi Password</label>
-                                <input type="password" class="form-control" placeholder="Konfirmasi password">
+                                <input type="password" class="form-control" id="tambah_confirm_password" required>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Role</label>
-                                <select class="form-select">
-                                    <option selected>Pilih Role</option>
-                                    <option value="super_admin">Super Admin</option>
-                                    <option value="admin">Admin</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Status</label>
-                                <select class="form-select">
-                                    <option value="aktif" selected>Aktif</option>
-                                    <option value="nonaktif">Nonaktif</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-end gap-2 mt-4">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-save">
-                                <i class="fas fa-save me-2"></i>Simpan Admin
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-add">
+                            <i class="fas fa-save me-2"></i>Simpan
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -723,66 +548,114 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Data Admin</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <form>
+                <form method="POST" onsubmit="return validateForm('edit')">
+                    <input type="hidden" name="action" value="edit">
+                    <input type="hidden" name="id" id="edit_id">
+                    <div class="modal-body">
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Nama Lengkap</label>
-                                <input type="text" class="form-control" value="Ahmad Fauzi">
+                                <input type="text" class="form-control" name="nama" id="edit_nama" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Username</label>
-                                <input type="text" class="form-control" value="ahmadfauzi">
+                                <input type="text" class="form-control" name="username" id="edit_username" required>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Email</label>
-                                <input type="email" class="form-control" value="ahmad@dapurpakundut.com">
+                                <input type="email" class="form-control" name="email" id="edit_email" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">No. Telepon</label>
-                                <input type="tel" class="form-control" value="081234567890">
+                                <input type="tel" class="form-control" name="telepon" id="edit_telepon" required>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Password Baru</label>
-                                <input type="password" class="form-control" placeholder="Kosongkan jika tidak ingin mengubah">
+                                <input type="password" class="form-control" name="password" id="edit_password" placeholder="Kosongkan jika tidak diubah">
+                                <small class="text-muted">Kosongkan jika tidak ingin mengubah password</small>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Konfirmasi Password</label>
-                                <input type="password" class="form-control" placeholder="Konfirmasi password baru">
+                                <input type="password" class="form-control" id="edit_confirm_password" placeholder="Konfirmasi password baru">
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Role</label>
-                                <select class="form-select">
-                                    <option value="super_admin" selected>Super Admin</option>
-                                    <option value="admin">Admin</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Status</label>
-                                <select class="form-select">
-                                    <option value="aktif" selected>Aktif</option>
-                                    <option value="nonaktif">Nonaktif</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-end gap-2 mt-4">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-save">
-                                <i class="fas fa-save me-2"></i>Update Admin
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-add">
+                            <i class="fas fa-save me-2"></i>Update
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function validateForm(type) {
+            const password = document.getElementById(type + '_password').value;
+            const confirmPassword = document.getElementById(type + '_confirm_password').value;
+            
+            if (type === 'tambah' && password !== confirmPassword) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Password Tidak Cocok',
+                    text: 'Password dan konfirmasi password harus sama!',
+                    confirmButtonColor: '#FF8C00'
+                });
+                return false;
+            }
+            
+            if (type === 'edit' && password !== '' && password !== confirmPassword) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Password Tidak Cocok',
+                    text: 'Password dan konfirmasi password harus sama!',
+                    confirmButtonColor: '#FF8C00'
+                });
+                return false;
+            }
+            
+            return true;
+        }
+
+        function editAdmin(admin) {
+            document.getElementById('edit_id').value = admin.id;
+            document.getElementById('edit_nama').value = admin.nama;
+            document.getElementById('edit_username').value = admin.username;
+            document.getElementById('edit_email').value = admin.email;
+            document.getElementById('edit_telepon').value = admin.telepon;
+            document.getElementById('edit_password').value = '';
+            document.getElementById('edit_confirm_password').value = '';
+            
+            const modal = new bootstrap.Modal(document.getElementById('modalEditAdmin'));
+            modal.show();
+        }
+
+        function hapusAdmin(id, nama) {
+            Swal.fire({
+                title: 'Hapus Admin?',
+                text: `Yakin ingin menghapus admin "${nama}"? Data yang sudah dihapus tidak dapat dikembalikan!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `data_admin.php?action=hapus&id=${id}`;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

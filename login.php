@@ -1,29 +1,39 @@
 <?php
-// --- PROSES LOGIN SEDERHANA (Tanpa Database) ---
+session_start();
+include 'koneksi.php';
+
+// Proses Login
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $role = $_POST['role'];
-
-    if ($role == "Admin") {
-    $user = $_POST['adminUser'];
-    $pass = $_POST['adminPass'];
-
-    // Login Admin
-    if ($user == "admin" && $pass == "12345") {
-        echo "<script>alert('Login Admin berhasil!'); window.location='index.php';</script>";
+    $username = mysqli_real_escape_string($conn, $_POST['username']);
+    $password = mysqli_real_escape_string($conn, $_POST['password']);
+    
+    // Query untuk cek admin di database
+    $sql = "SELECT * FROM admin WHERE username = '$username' LIMIT 1";
+    $result = mysqli_query($conn, $sql);
+    
+    if (mysqli_num_rows($result) == 1) {
+        $row = mysqli_fetch_assoc($result);
+        
+        // Verifikasi password (asumsi password di database dalam bentuk plain text atau hash)
+        // Jika menggunakan hash, gunakan: password_verify($password, $row['password'])
+        if ($password == $row['password']) {
+            // Login berhasil - simpan data ke session
+            $_SESSION['admin_id'] = $row['id'];
+            $_SESSION['admin_username'] = $row['username'];
+            $_SESSION['admin_nama'] = $row['nama'];
+            $_SESSION['admin_email'] = $row['email'];
+            $_SESSION['logged_in'] = true;
+            
+            echo "<script>
+                    alert('Login berhasil! Selamat datang " . $row['nama'] . "');
+                    window.location='admin.php';
+                  </script>";
+            exit();
+        } else {
+            $error = "Password salah!";
+        }
     } else {
-        echo "<script>alert('Username atau Password Admin salah!');</script>";
-    }
-
-    } elseif ($role == "Owner") {
-        $email = $_POST['ownerEmail'];
-        $pass = $_POST['ownerPass'];
-
-    // Login Owner
-    if ($email == "owner@gmail.com" && $pass == "12345") {
-        echo "<script>alert('Login Owner berhasil!'); window.location='admin.php';</script>";
-    } else {
-        echo "<script>alert('Email atau Password Owner salah!');</script>";
-    }
+        $error = "Username tidak ditemukan!";
     }
 }
 ?>
@@ -33,173 +43,273 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Dapur Pak Ndut</title>
+    <title>Login Admin - Dapur Pak Ndut</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-    body {
-        font-family: 'Poppins', sans-serif;
-        background: linear-gradient(135deg, #f9b208, #f98404);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        margin: 0;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .login-container {
-        background: #fff;
-        padding: 40px 50px;
-        border-radius: 20px;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-        width: 100%;
-        max-width: 420px;
-        text-align: center;
-    }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f9b208 0%, #f98404 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-    .login-container h2 {
-        color: #333;
-        margin-bottom: 25px;
-    }
+        .login-container {
+            background: #ffffff;
+            padding: 50px 60px;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            animation: slideUp 0.5s ease-out;
+        }
 
-    .tab-buttons {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 25px;
-    }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    .tab-buttons button {
-        flex: 1;
-        padding: 10px;
-        border: none;
-        cursor: pointer;
-        background: #eee;
-        color: #555;
-        font-weight: bold;
-        transition: 0.3s;
-        border-radius: 10px;
-        margin: 0 5px;
-    }
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #f9b208, #f98404);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            font-size: 40px;
+            box-shadow: 0 5px 15px rgba(249, 178, 8, 0.4);
+        }
 
-    .tab-buttons button.active {
-        background: #f9b208;
-        color: white;
-    }
+        .login-container h2 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+            font-weight: 700;
+        }
 
-    .form-group {
-        text-align: left;
-        margin-bottom: 15px;
-    }
+        .subtitle {
+            color: #777;
+            margin-bottom: 35px;
+            font-size: 14px;
+        }
 
-    .form-group label {
-        font-size: 14px;
-        color: #444;
-        display: block;
-        margin-bottom: 5px;
-    }
+        .alert {
+            background: #fee;
+            color: #c33;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            border: 1px solid #fcc;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: shake 0.3s;
+        }
 
-    .form-group input {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        font-size: 15px;
-    }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
 
-    .login-btn {
-        width: 100%;
-        background-color: #f9b208;
-        border: none;
-        color: white;
-        padding: 12px;
-        border-radius: 10px;
-        font-size: 16px;
-        cursor: pointer;
-        margin-top: 10px;
-        transition: 0.3s;
-    }
+        .form-group {
+            text-align: left;
+            margin-bottom: 25px;
+        }
 
-    .login-btn:hover {
-        background-color: #f98404;
-    }
+        .form-group label {
+            font-size: 14px;
+            color: #444;
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
 
-    .back-link {
-        margin-top: 20px;
-        display: block;
-        font-size: 14px;
-        color: #444;
-        text-decoration: none;
-    }
+        .input-wrapper {
+            position: relative;
+        }
 
-    .back-link:hover {
-        text-decoration: underline;
-    }
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #999;
+        }
 
-    .form-section {
-        display: none;
-    }
+        .form-group input {
+            width: 100%;
+            padding: 14px 15px 14px 45px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+        }
 
-    .form-section.active {
-        display: block;
-    }
+        .form-group input:focus {
+            outline: none;
+            border-color: #f9b208;
+            box-shadow: 0 0 0 4px rgba(249, 178, 8, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #bbb;
+        }
+
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #f9b208, #f98404);
+            border: none;
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(249, 178, 8, 0.3);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(249, 178, 8, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .back-link {
+            margin-top: 25px;
+            display: inline-block;
+            font-size: 14px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            color: #f9b208;
+            transform: translateX(-5px);
+        }
+
+        .divider {
+            margin: 30px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: #e0e0e0;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+            color: #999;
+            font-size: 13px;
+        }
+
+        /* Responsive */
+        @media (max-width: 500px) {
+            .login-container {
+                padding: 35px 30px;
+            }
+            
+            .login-container h2 {
+                font-size: 24px;
+            }
+        }
     </style>
 </head>
 <body>
-
     <div class="login-container">
-    <h2>Login Dapur Pak Ndut</h2>
+        <div class="logo">🍳</div>
+        <h2>Login Admin</h2>
+        <p class="subtitle">Dapur Kuliner Pak Ndut</p>
 
-    <div class="tab-buttons">
-        <button id="btnAdmin" class="active" onclick="showForm('admin')">Admin</button>
-        <button id="btnOwner" onclick="showForm('owner')">Owner</button>
-    </div>
+        <?php if (isset($error)): ?>
+            <div class="alert">
+                <span>⚠️</span>
+                <span><?php echo $error; ?></span>
+            </div>
+        <?php endif; ?>
 
-    <!-- Form Admin -->
-    <form id="formAdmin" class="form-section active" method="POST">
-        <input type="hidden" name="role" value="Admin">
-        <div class="form-group">
-            <label for="adminUser">Username Admin</label>
-            <input type="text" name="adminUser" id="adminUser" required placeholder="Masukkan username Admin">
-        </div>
-        <div class="form-group">
-            <label for="adminPass">Password</label>
-            <input type="password" name="adminPass" id="adminPass" required placeholder="Masukkan password Admin">
-        </div>
-        <button type="submit" class="login-btn">Login Admin</button>
-    </form>
+        <form method="POST" action="">
+            <div class="form-group">
+                <label for="username">Username Admin</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">👤</span>
+                    <input type="text" name="username" id="username" 
+                           required placeholder="Masukkan username"
+                           value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
+                </div>
+            </div>
 
-    <!-- Form Owner -->
-    <form id="formOwner" class="form-section" method="POST">
-        <input type="hidden" name="role" value="Owner">
-        <div class="form-group">
-            <label for="ownerEmail">Email Owner</label>
-            <input type="email" name="ownerEmail" id="ownerEmail" required placeholder="Masukkan email Owner">
-        </div>
-        <div class="form-group">
-            <label for="ownerPass">Password</label>
-            <input type="password" name="ownerPass" id="ownerPass" required placeholder="Masukkan password Owner">
-        </div>
-        <button type="submit" class="login-btn">Login Owner</button>
-    </form>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" name="password" id="password" 
+                           required placeholder="Masukkan password">
+                </div>
+            </div>
 
-    <a href="index.html" class="back-link">← Kembali ke Beranda</a>
+            <button type="submit" class="login-btn">🚀 Login Sekarang</button>
+        </form>
+
+        <div class="divider">
+            <span>atau</span>
+        </div>
+
+        <a href="index.php" class="back-link">← Kembali ke Beranda</a>
     </div>
 
     <script>
-    // Ganti tampilan form Admin/Owner
-    function showForm(role) {
-        document.getElementById('formAdmin').classList.remove('active');
-        document.getElementById('formOwner').classList.remove('active');
-        document.getElementById('btnAdmin').classList.remove('active');
-        document.getElementById('btnOwner').classList.remove('active');
+        // Auto focus ke input username saat halaman dimuat
+        document.getElementById('username').focus();
 
-        if (role === 'admin') {
-            document.getElementById('formAdmin').classList.add('active');
-            document.getElementById('btnAdmin').classList.add('active');
-        } else {
-            document.getElementById('formOwner').classList.add('active');
-            document.getElementById('btnOwner').classList.add('active');
-        }
-    }
+        // Animasi untuk input saat ada error
+        <?php if (isset($error)): ?>
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.style.borderColor = '#ff4444';
+            setTimeout(() => {
+                input.style.borderColor = '#e0e0e0';
+            }, 1000);
+        });
+        <?php endif; ?>
     </script>
-
 </body>
 </html>
