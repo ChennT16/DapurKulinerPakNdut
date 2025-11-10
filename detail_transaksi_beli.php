@@ -1,93 +1,3 @@
-<?php
-// Proses jika ada request POST (dari AJAX)
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Cek apakah ini request JSON
-    $contentType = isset($_SERVER["CONTENT_TYPE"]) ? trim($_SERVER["CONTENT_TYPE"]) : '';
-    
-    if (stripos($contentType, 'application/json') !== false) {
-        header('Content-Type: application/json');
-        
-        // Koneksi database - SESUAIKAN DENGAN SETTING ANDA
-        $host = 'localhost';
-        $dbname = 'umkm';
-        $username = 'root';
-        $password = '';
-        
-        try {
-            $conn = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            
-            // Ambil data dari request
-            $inputJSON = file_get_contents('php://input');
-            $data = json_decode($inputJSON, true);
-            
-            if (!$data) {
-                throw new Exception('Data tidak valid');
-            }
-            
-            // Validasi data
-            if (empty($data['nama_pembeli']) || empty($data['items'])) {
-                throw new Exception('Data tidak lengkap - Nama pembeli atau items kosong');
-            }
-            
-            // Mulai transaksi
-            $conn->beginTransaction();
-            
-            // Insert ke tabel detail_transaksi_beli
-            $sql = "INSERT INTO detail_transaksi_beli 
-                    (id_transaksi_beli, nama_pembeli, tanggal_pembelian, jenis_barang, banyak_barang) 
-                    VALUES 
-                    (:id_transaksi, :nama_pembeli, :tanggal, :jenis_barang, :banyak_barang)";
-            
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([
-                ':id_transaksi' => $data['id_transaksi_beli'],
-                ':nama_pembeli' => $data['nama_pembeli'],
-                ':tanggal' => $data['tanggal_pembelian'],
-                ':jenis_barang' => $data['jenis_barang'],
-                ':banyak_barang' => $data['banyak_barang']
-            ]);
-            
-            // Commit transaksi
-            $conn->commit();
-            
-            echo json_encode([
-                'success' => true,
-                'message' => 'Transaksi berhasil disimpan',
-                'id_transaksi' => $data['id_transaksi_beli']
-            ]);
-            
-            exit;
-            
-        } catch (PDOException $e) {
-            // Rollback jika terjadi error
-            if (isset($conn)) {
-                $conn->rollBack();
-            }
-            
-            echo json_encode([
-                'success' => false,
-                'message' => 'Database Error: ' . $e->getMessage()
-            ]);
-            
-            exit;
-            
-        } catch (Exception $e) {
-            // Rollback jika terjadi error
-            if (isset($conn)) {
-                $conn->rollBack();
-            }
-            
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
-            
-            exit;
-        }
-    }
-}
-?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -376,7 +286,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             max-height: calc(100vh - 40px);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
         }
 
         .cart-section h2 {
@@ -388,41 +297,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             gap: 10px;
         }
 
-        .customer-name-section {
-            background: #FFF3E0;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 2px solid #FFE0B2;
-        }
-
-        .customer-name-section label {
-            display: block;
-            color: #333;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 0.95em;
-        }
-
-        .customer-name-section input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #FF9800;
-            border-radius: 8px;
-            font-size: 1em;
-            transition: all 0.3s;
-        }
-
-        .customer-name-section input:focus {
-            outline: none;
-            border-color: #F57C00;
-            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
-        }
-
-        .customer-name-section input::placeholder {
-            color: #999;
-        }
-
         .cart-empty {
             text-align: center;
             color: #999;
@@ -432,11 +306,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .cart-items {
             overflow-y: auto;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             flex: 1;
             padding-right: 5px;
-            min-height: 100px;
-            max-height: calc(100vh - 500px);
         }
 
         .cart-items::-webkit-scrollbar {
@@ -531,11 +403,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: #dc2626;
         }
 
+        .order-info {
+            background: #FFF3E0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #FF9800;
+        }
+
+        .order-info-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .order-info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .order-info-label {
+            font-weight: 600;
+            color: #666;
+            min-width: 120px;
+        }
+
+        .order-info-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .order-info input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95em;
+        }
+
+        .order-info input:focus {
+            outline: none;
+            border-color: #FF9800;
+        }
+
         .cart-total {
             border-top: 2px solid #e5e7eb;
             padding-top: 15px;
             margin-bottom: 15px;
-            flex-shrink: 0;
         }
 
         .total-row {
@@ -564,7 +479,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 1.1em;
             font-weight: bold;
             transition: all 0.3s;
-            flex-shrink: 0;
         }
 
         .checkout-btn:hover {
@@ -641,18 +555,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="cart-section">
                 <h2>🛒 Keranjang</h2>
-                
-                <!-- Input Nama Pembeli -->
-                <div class="customer-name-section">
-                    <label for="namaPembeli">👤 Nama Pembeli:</label>
-                    <input 
-                        type="text" 
-                        id="namaPembeli" 
-                        placeholder="Masukkan nama Anda..."
-                        maxlength="50"
-                    >
-                </div>
-
                 <div id="cartContent">
                     <div class="cart-empty">Keranjang masih kosong<br>Silakan pilih menu</div>
                 </div>
@@ -895,81 +797,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 return;
             }
 
-            const namaPembeli = document.getElementById('namaPembeli').value.trim();
-            
-            if (!namaPembeli) {
-                alert('⚠️ Mohon isi nama pembeli terlebih dahulu!');
-                document.getElementById('namaPembeli').focus();
-                return;
-            }
-
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-            // Generate ID transaksi unik
-            const timestamp = new Date().getTime();
-            const idTransaksi = 'TRX' + timestamp;
+            let orderDetails = '=== PESANAN ANDA ===\n\n';
+            cart.forEach(item => {
+                orderDetails += `${item.name}\n`;
+                orderDetails += `${item.quantity} x ${formatRupiah(item.price)} = ${formatRupiah(item.price * item.quantity)}\n\n`;
+            });
+            orderDetails += `━━━━━━━━━━━━━━━━━━━━\n`;
+            orderDetails += `Total: ${formatRupiah(total)}\n`;
+            orderDetails += `Jumlah Item: ${itemCount}\n\n`;
+            orderDetails += '✅ Terima kasih telah memesan di Dapur Kuliner Pak Ndut!';
 
-            // Data untuk dikirim ke database
-            const transaksiData = {
-                id_transaksi_beli: idTransaksi,
-                nama_pembeli: namaPembeli,
-                tanggal_pembelian: new Date().toISOString().split('T')[0],
-                jenis_barang: cart.map(item => item.name).join(', '),
-                banyak_barang: itemCount,
-                items: cart.map(item => ({
-                    id: item.id,
-                    name: item.name,
-                    quantity: item.quantity,
-                    price: item.price,
-                    subtotal: item.price * item.quantity
-                }))
-            };
+            alert(orderDetails);
 
-            // Simpan ke database
-            saveTransaction(transaksiData, namaPembeli, total, itemCount, idTransaksi);
-        }
-
-        async function saveTransaction(transaksiData, namaPembeli, total, itemCount, idTransaksi) {
-            try {
-                const response = await fetch('pesan.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(transaksiData)
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    let orderDetails = '✅ PESANAN BERHASIL DISIMPAN!\n\n';
-                    orderDetails += `ID Transaksi: ${idTransaksi}\n`;
-                    orderDetails += `Nama Pembeli: ${namaPembeli}\n`;
-                    orderDetails += `Tanggal: ${new Date().toLocaleDateString('id-ID')}\n\n`;
-                    orderDetails += '=== DETAIL PESANAN ===\n\n';
-                    cart.forEach(item => {
-                        orderDetails += `${item.name}\n`;
-                        orderDetails += `${item.quantity} x ${formatRupiah(item.price)} = ${formatRupiah(item.price * item.quantity)}\n\n`;
-                    });
-                    orderDetails += `━━━━━━━━━━━━━━━━━━━━\n`;
-                    orderDetails += `Total: ${formatRupiah(total)}\n`;
-                    orderDetails += `Jumlah Item: ${itemCount}\n\n`;
-                    orderDetails += '✅ Terima kasih telah memesan di Dapur Kuliner Pak Ndut!';
-
-                    alert(orderDetails);
-
-                    // Reset cart dan nama pembeli
-                    cart = [];
-                    document.getElementById('namaPembeli').value = '';
-                    updateCart();
-                } else {
-                    alert('❌ Terjadi kesalahan: ' + result.message);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('❌ Terjadi kesalahan saat menyimpan pesanan. Silakan coba lagi.');
-            }
+            // Reset cart setelah checkout
+            cart = [];
+            updateCart();
         }
 
         // Inisialisasi tampilan menu
