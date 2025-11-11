@@ -663,7 +663,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script>
         // Data menu dengan stok dari database
         const menuData = [
-            { id: 1, name: 'Pentol Bakar', price: 1000, category: 'Pentol', image: 'img/PENTOL BAKAR.jpg', stock: 20 },
+            { id: 1, name: 'Pentol Bakar', price: 1000, category: 'Pentol', image: 'img/PENTOL BAKAR.jpg', stock: 250 },
             { id: 11111, name: 'Pentol', price: 5000, category: 'Pentol', image: 'img/PENTOL.jpg', stock: 250 },
             { id: 11112, name: 'Pentol Tahu', price: 5000, category: 'Pentol', image: 'img/PENTOL TAHU.jpg', stock: 250 },
             { id: 11119, name: 'Tahu Bakar', price: 1000, category: 'Pentol', image: 'img/TAHU BAKAR.jpg', stock: 250 },
