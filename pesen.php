@@ -104,7 +104,7 @@ if (isset($_POST['tambah_menu'])) {
 </form>
         <!-- Tampilkan keranjang -->
         <div id="keranjang">
-            <!-- Isi keranjang dari session -->
+            <!--- Isi keranjang dari session --->
         </div>
         
         <button type="submit" 
