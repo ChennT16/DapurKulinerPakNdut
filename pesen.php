@@ -102,7 +102,7 @@ if (isset($_POST['tambah_menu'])) {
         + Tambah
     </button>
 </form>
-        <!-- Tampilkan keranjang -->
+        <!--- Tampilkan keranjang --->
         <div id="keranjang">
             <!--- Isi keranjang dari session --->
         </div>
