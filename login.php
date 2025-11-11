@@ -293,7 +293,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <span>atau</span>
         </div>
 
-        <a href="index.php" class="back-link">← Kembali ke Beranda</a>
+        <a href="index.html" class="back-link">← Kembali ke Beranda</a>
     </div>
 
     <script>
