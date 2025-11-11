@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "<script>
                     alert('Login berhasil! Selamat datang " . $row['nama'] . "');
                     window.location='admin.php';
-                  </script>";
+                    </script>";
             exit();
         } else {
             $error = "Password salah!";
