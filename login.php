@@ -44,9 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Admin - Dapur Pak Ndut</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         * {
             margin: 0;
@@ -272,8 +270,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="input-wrapper">
                     <span class="input-icon">👤</span>
                     <input type="text" name="username" id="username" 
-                           required placeholder="Masukkan username"
-                           value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
+                            required placeholder="Masukkan username"
+                            value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
                 </div>
             </div>
 
@@ -282,7 +280,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="input-wrapper">
                     <span class="input-icon">🔒</span>
                     <input type="password" name="password" id="password" 
-                           required placeholder="Masukkan password">
+                            required placeholder="Masukkan password">
                 </div>
             </div>
 
