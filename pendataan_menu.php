@@ -1,4 +1,4 @@
-<?php
+<?php 
 include 'koneksi.php';
 $query = mysqli_query($conn, "SELECT * FROM menu ORDER BY id_menu ASC");
 ?>
@@ -78,49 +78,61 @@ body {
   border: none;
   cursor: pointer;
   font-weight: 600;
-  border-radius: 8px;
-  padding: 10px 18px;
+  border-radius: 10px;
+  padding: 12px 20px;
   transition: 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
 }
 
 .btn-add {
-  background: #FF9800;
+  background: linear-gradient(90deg, #ff9800, #f57c00);
   color: white;
+  box-shadow: 0 4px 10px rgba(255, 152, 0, 0.3);
 }
 
 .btn-add:hover {
-  background: #F57C00;
+  background: linear-gradient(90deg, #ffa726, #fb8c00);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(255, 152, 0, 0.4);
+}
+
+/* Tombol Edit & Hapus */
+.btn-edit, .btn-hapus {
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s;
+  display: inline-block;
 }
 
 .btn-edit {
   background: #7C4DFF;
   color: white;
-  text-decoration: none;
-  padding: 6px 14px;
-  border-radius: 6px;
-  margin-right: 5px;
-  display: inline-block;
 }
 
 .btn-edit:hover {
   background: #6b3de8;
+  box-shadow: 0 3px 10px rgba(124, 77, 255, 0.4);
+  transform: scale(1.05);
 }
 
-.btn-delete {
+.btn-hapus {
   background: #F44336;
   color: white;
-  text-decoration: none;
-  padding: 6px 14px;
-  border-radius: 6px;
-  display: inline-block;
 }
 
-.btn-delete:hover {
+.btn-hapus:hover {
   background: #d32f2f;
+  box-shadow: 0 3px 10px rgba(244, 67, 54, 0.4);
+  transform: scale(1.05);
 }
 
 /* =======================
-   CONTROLS (Search & Filter)
+   CONTROLS
 ======================= */
 .controls {
   margin: 20px 0;
@@ -186,7 +198,7 @@ tbody tr:hover {
 }
 
 /* =======================
-   MENU CATEGORY TAG
+   CATEGORY & PRICE
 ======================= */
 .menu-category {
   background: #ffcc80;
@@ -211,7 +223,7 @@ tbody tr:hover {
 .action-buttons {
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 /* =======================
@@ -224,6 +236,7 @@ tbody tr:hover {
 
   .btn-add {
     width: 100%;
+    justify-content: center;
   }
 
   table, th, td {
@@ -245,11 +258,11 @@ tbody tr:hover {
       <div class="header-icon">🍽️</div>
       <div class="header-title">
         <h1>Data Menu</h1>
-        <div class="breadcrumb"><a href="#">Dashboard</a> / Data Menu</div>
+        <div class="breadcrumb"><a href="admin.php">Dashboard</a> / Data Menu</div>
       </div>
     </div>
     <div class="header-buttons">
-      <button class="btn btn-add" onclick="window.location.href='tambah_menu.php'">+ Tambah Menu</button>
+      <button class="btn btn-add" onclick="window.location.href='tambah_menu.php'">➕ Tambah Menu</button>
     </div>
   </div>
 
@@ -283,7 +296,9 @@ tbody tr:hover {
             <td><?= $no++; ?></td>
             <td>
               <?php if (!empty($row['gambar_menu'])): ?>
-                <img src="img/<?= htmlspecialchars($row['gambar_menu']); ?>" alt="<?= htmlspecialchars($row['nama_menu']); ?>" class="menu-image">
+                <img src="img/<?= htmlspecialchars($row['gambar_menu']); ?>" 
+                     alt="<?= htmlspecialchars($row['nama_menu']); ?>" 
+                     class="menu-image">
               <?php else: ?>
                 <img src="img/default.jpg" alt="No Image" class="menu-image">
               <?php endif; ?>
@@ -292,18 +307,13 @@ tbody tr:hover {
             <td><span class="menu-category"><?= ucfirst($row['jenis_menu']); ?></span></td>
             <td class="menu-price">Rp <?= number_format($row['harga_menu'], 0, ',', '.'); ?></td>
             <td class="menu-stock"><?= htmlspecialchars($row['stock_menu']); ?></td>
-            <td>
-                <!-- Tombol Edit -->
-                    <a href="edit_menu.php?id=<?php echo $row['id_menu']; ?>" class="btn-edit">
-                        🔧 Edit
-                    </a>
-
-                <!-- Tombol Hapus dengan konfirmasi JavaScript -->
-                    <a href="hapus_menu.php?id=<?php echo $row['id_menu']; ?>" 
-                    class="btn-hapus"
-                    onclick="return confirm('⚠️ Apakah Anda yakin ingin menghapus menu <?php echo addslashes($row['nama_menu']); ?>?')">
-                        🗑️ Hapus
-                    </a>
+            <td class="action-buttons">
+              <a href="edit_menu.php?id=<?= $row['id_menu']; ?>" class="btn-edit">✏️ Edit</a>
+              <a href="hapus_menu.php?id=<?= $row['id_menu']; ?>" 
+                 class="btn-hapus"
+                 onclick="return confirm('⚠️ Yakin ingin menghapus <?= addslashes($row['nama_menu']); ?>?')">
+                 🗑️ Hapus
+              </a>
             </td>
           </tr>
         <?php } ?>
