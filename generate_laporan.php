@@ -1,3 +1,15 @@
+<?php
+include 'koneksi.php';
+
+// Query untuk mengambil semua data menu dari database
+$query = "SELECT nama_menu, jenis_menu, harga_menu FROM menu ORDER BY jenis_menu, nama_menu";
+$result = mysqli_query($conn, $query);
+
+// Cek apakah query berhasil
+if (!$result) {
+    die("Query gagal: " . mysqli_error($conn));
+}
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -31,7 +43,14 @@
             color: #FF9800;
             text-align: center;
             font-size: 2.5em;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
+        }
+
+        .info {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.95em;
         }
 
         .data-table {
@@ -75,6 +94,13 @@
         .data-table td {
             padding: 16px 18px;
             color: #333;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
         }
 
         .button-container {
@@ -137,6 +163,10 @@
             .data-table tbody tr:hover {
                 transform: none;
             }
+
+            .info {
+                display: none;
+            }
         }
 
         @media (max-width: 768px) {
@@ -170,7 +200,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>Data Menu</h1>
+        <h1>📋 Data Menu</h1>
+        <div class="info">
+            Dicetak pada: <?php echo date('d F Y, H:i'); ?> WIB | Total Menu: <?php echo mysqli_num_rows($result); ?>
+        </div>
 
         <table class="data-table">
             <thead>
@@ -181,91 +214,21 @@
                 </tr>
             </thead>
             <tbody id="menuTableBody">
-                <tr>
-                    <td>Pentol</td>
-                    <td>Pentol & Gorengan</td>
-                    <td>Rp 5.000</td>
-                </tr>
-                <tr>
-                    <td>Pentol Tahu</td>
-                    <td>Pentol & Gorengan</td>
-                    <td>Rp 5.000</td>
-                </tr>
-                <tr>
-                    <td>Pentol Bakar</td>
-                    <td>Pentol & Gorengan</td>
-                    <td>Rp 1.000</td>
-                </tr>
-                <tr>
-                    <td>Tahu Bakar</td>
-                    <td>Pentol & Gorengan</td>
-                    <td>Rp 1.000</td>
-                </tr>
-                <tr>
-                    <td>Gorengan Pangsit</td>
-                    <td>Pentol & Gorengan</td>
-                    <td>Rp 1.000</td>
-                </tr>
-                <tr>
-                    <td>Nasi Bento Ayam Katsu</td>
-                    <td>Nasi Bento</td>
-                    <td>Rp 10.000</td>
-                </tr>
-                <tr>
-                    <td>Nasi Bento Ayam Crispy</td>
-                    <td>Nasi Bento</td>
-                    <td>Rp 10.000</td>
-                </tr>
-                <tr>
-                    <td>Nasi Bento Ayam Geprek</td>
-                    <td>Nasi Bento</td>
-                    <td>Rp 10.000</td>
-                </tr>
-                <tr>
-                    <td>Nasi Bento Beff & Sosis</td>
-                    <td>Nasi Bento</td>
-                    <td>Rp 10.000</td>
-                </tr>
-                <tr>
-                    <td>Nasi Bento Rica-Rica Balungan</td>
-                    <td>Nasi Bento</td>
-                    <td>Rp 8.000</td>
-                </tr>
-                <tr>
-                    <td>Nasi Bento Ati Ampela</td>
-                    <td>Nasi Bento</td>
-                    <td>Rp 8.000</td>
-                </tr>
-                <tr>
-                    <td>Susu Kedelai</td>
-                    <td>Minuman</td>
-                    <td>Rp 6.000</td>
-                </tr>
-                <tr>
-                    <td>Es Kuwut</td>
-                    <td>Minuman</td>
-                    <td>Rp 3.000</td>
-                </tr>
-                <tr>
-                    <td>Es Rasa Rasa</td>
-                    <td>Minuman</td>
-                    <td>Rp 3.000</td>
-                </tr>
-                <tr>
-                    <td>Es Teh</td>
-                    <td>Minuman</td>
-                    <td>Rp 3.000</td>
-                </tr>
-                <tr>
-                    <td>Teh Lemon</td>
-                    <td>Minuman</td>
-                    <td>Rp 3.000</td>
-                </tr>
-                <tr>
-                    <td>Air Mineral</td>
-                    <td>Minuman</td>
-                    <td>Rp 3.000</td>
-                </tr>
+                <?php 
+                if (mysqli_num_rows($result) > 0) {
+                    // Loop untuk menampilkan setiap baris data dari database
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        echo "<tr>";
+                        echo "<td>" . htmlspecialchars($row['nama_menu']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['jenis_menu']) . "</td>";
+                        echo "<td>Rp " . number_format($row['harga_menu'], 0, ',', '.') . "</td>";
+                        echo "</tr>";
+                    }
+                } else {
+                    // Jika tidak ada data
+                    echo "<tr><td colspan='3' class='empty-state'>⚠️ Tidak ada data menu di database</td></tr>";
+                }
+                ?>
             </tbody>
         </table>
 
@@ -285,8 +248,12 @@
         }
 
         function goBack() {
-            window.history.back();
+            window.location.href = 'pendataan_menu.php';
         }
     </script>
 </body>
 </html>
+<?php
+// Tutup koneksi database
+mysqli_close($conn);
+?>

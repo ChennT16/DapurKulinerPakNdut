@@ -8,40 +8,43 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $jenis_menu = mysqli_real_escape_string($conn, $_POST['jenis_menu']);
     $stock_menu = mysqli_real_escape_string($conn, $_POST['stock_menu']);
     $id_produksi = isset($_POST['id_produksi']) ? mysqli_real_escape_string($conn, $_POST['id_produksi']) : '';
-    
-    // Upload gambar
-    $gambar_menu = '';
-    if (isset($_FILES['gambar_menu']) && $_FILES['gambar_menu']['error'] == 0) {
-        $target_dir = "images/menu/";
-        
-        // Cek apakah folder ada, jika tidak buat folder
-        if (!file_exists($target_dir)) {
-            mkdir($target_dir, 0777, true);
-        }
-        
-        $file_extension = strtolower(pathinfo($_FILES["gambar_menu"]["name"], PATHINFO_EXTENSION));
-        $new_filename = 'menu_' . time() . '_' . uniqid() . '.' . $file_extension;
-        $target_file = $target_dir . $new_filename;
-        
-        // Validasi file
-        $allowed_types = array('jpg', 'jpeg', 'png', 'gif');
-        $max_size = 2 * 1024 * 1024; // 2MB
-        
-        if (in_array($file_extension, $allowed_types) && $_FILES["gambar_menu"]["size"] <= $max_size) {
-            if (move_uploaded_file($_FILES["gambar_menu"]["tmp_name"], $target_file)) {
-                $gambar_menu = $new_filename;
+    // Upload gambar menu
+        $gambar_menu = null;
+        if (isset($_FILES['gambar_menu']) && $_FILES['gambar_menu']['size'] > 0) {
+            $file = $_FILES['gambar_menu'];
+            $allowed_types = ['image/jpeg', 'image/png', 'image/jpg'];
+            $max_size = 2 * 1024 * 1024; // 2MB
+
+            // Validasi format
+            if (!in_array($file['type'], $allowed_types)) {
+                $error_msg = "Format file gambar harus JPG atau PNG!";
+            } elseif ($file['size'] > $max_size) {
+                $error_msg = "Ukuran gambar maksimal 2MB!";
             } else {
-                $error_msg = "Gagal mengupload gambar!";
+                $upload_dir = 'img/'; // folder penyimpanan gambar
+                if (!file_exists($upload_dir)) {
+                    mkdir($upload_dir, 0777, true);
+                }
+
+                // Buat nama file unik
+                $filename = time() . '_' . str_replace(' ', '_', basename($file['name']));
+                $destination = $upload_dir . $filename;
+
+                // Pindahkan file
+                if (move_uploaded_file($file['tmp_name'], $destination)) {
+                    $gambar_menu = $filename;
+                } else {
+                    $error_msg = "Gagal mengupload gambar. Periksa hak akses folder.";
+                }
             }
-        } else {
-            $error_msg = "File harus berformat JPG/JPEG/PNG dan maksimal 2MB!";
         }
-    }
+
     
     if (!isset($error_msg)) {
         // Insert ke database - TANPA id_menu (AUTO_INCREMENT akan generate otomatis)
-        $sql = "INSERT INTO menu (nama_menu, harga_menu, jenis_menu, stock_menu, gambar_menu, id_produksi) 
-                VALUES ('$nama_menu', '$harga_menu', '$jenis_menu', '$stock_menu', '$gambar_menu', '$id_produksi')";
+$sql = "INSERT INTO menu (nama_menu, harga_menu, jenis_menu, stock_menu, gambar_menu, id_produksi)
+        VALUES ('$nama_menu', '$harga_menu', '$jenis_menu', '$stock_menu', '$gambar_menu', '$id_produksi')";
+
         
         if (mysqli_query($conn, $sql)) {
             echo "<script>
