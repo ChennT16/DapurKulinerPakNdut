@@ -57,8 +57,8 @@ $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <style>
 :root {
     --orange: #FF8C00;
-    --light-orange: #FFD9A3;
-    --white: #FFF;
+    --light-orange: #FF8C00;
+    --white: #FF8C00;
     --text-dark: #333;
     --shadow: 0 8px 25px rgba(0,0,0,0.1);
 }
@@ -71,7 +71,7 @@ body {
 }
 .sidebar {
     width: 250px;
-    background: linear-gradient(180deg, var(--orange), #FFB347);
+    background: linear-gradient(180deg, var(--orange), #FF8C00);
     color: white;
     box-shadow: var(--shadow);
     position: fixed;

@@ -29,7 +29,7 @@ $ulasan = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
-            background-color: #fff8f0;
+             background: linear-gradient(135deg, #FFF7E6, #FFD9A3);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         /* Header */
@@ -86,7 +86,7 @@ $ulasan = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         /* Sidebar (opsional jika mau dipakai juga) */
         .sidebar {
-            background: linear-gradient(180deg, #FF8C00, #FF6B00);
+            background: linear-gradient(180deg, #FF8C00, #FF8C00);
             min-height: 100vh;
             width: 240px;
             position: fixed;
