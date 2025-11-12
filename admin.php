@@ -190,7 +190,6 @@ body {
         <i class="fas fa-utensils"></i>
         <h4>Dapur Kuliner<br>Pak Ndut</h4>
     </div>
-    <a href="dashboard.php"><i class="fas fa-home me-2"></i> Dashboard</a>
     <a href="admin.php" class="active"><i class="fas fa-user-shield me-2"></i> Data Admin</a>
     <a href="pendataan_menu.php"><i class="fas fa-book me-2"></i> Menu</a>
     <a href="transaksi.php"><i class="fas fa-shopping-cart me-2"></i> Transaksi</a>

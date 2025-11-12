@@ -9,25 +9,89 @@ $query = mysqli_query($conn, "SELECT * FROM menu ORDER BY id_menu ASC");
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Data Menu - Dapur Kuliner Pak Ndut</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-/* =======================
-   GLOBAL STYLE
-======================= */
-body {
-  font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #FF9800, #F57C00);
+* {
   margin: 0;
-  padding: 20px;
-  color: #333;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --orange: #FF8C00;
+  --light-orange: #FFA726;
+  --text-dark: #333;
+  --shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #FFF7E6, #FFD9A3);
+  min-height: 100vh;
+  display: flex;
+}
+
+/* =======================
+   SIDEBAR
+======================= */
+.sidebar {
+  width: 250px;
+  background: linear-gradient(180deg, var(--orange), #FF8C00);
+  color: white;
+  box-shadow: var(--shadow);
+  position: fixed;
+  height: 100%;
+  padding-top: 30px;
+}
+
+.sidebar .logo {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.sidebar .logo i {
+  font-size: 3rem;
+}
+
+.sidebar .logo h4 {
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+.sidebar a {
+  display: block;
+  color: #fff;
+  padding: 12px 25px;
+  margin: 5px 15px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.sidebar a:hover, .sidebar a.active {
+  background: rgba(255,255,255,0.2);
+}
+
+.sidebar a i {
+  margin-right: 10px;
+}
+
+/* =======================
+   MAIN CONTENT
+======================= */
+.main-content {
+  margin-left: 250px;
+  padding: 30px;
+  width: calc(100% - 250px);
 }
 
 .container {
-  max-width: 1200px;
-  margin: auto;
   background: #fff;
   border-radius: 20px;
   padding: 30px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  box-shadow: var(--shadow);
 }
 
 /* =======================
@@ -40,6 +104,8 @@ body {
   border-bottom: 3px solid #FF9800;
   padding-bottom: 15px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
 .header-left {
@@ -59,11 +125,13 @@ body {
 .header-title h1 {
   color: #FF9800;
   margin: 0;
+  font-size: 1.8rem;
 }
 
 .breadcrumb {
   color: #888;
   font-size: 0.9em;
+  margin-top: 5px;
 }
 
 .breadcrumb a {
@@ -85,6 +153,7 @@ body {
   align-items: center;
   gap: 8px;
   font-size: 15px;
+  text-decoration: none;
 }
 
 .btn-add {
@@ -107,6 +176,7 @@ body {
   font-weight: 600;
   transition: all 0.3s;
   display: inline-block;
+  font-size: 13px;
 }
 
 .btn-edit {
@@ -145,14 +215,21 @@ body {
 .controls input,
 .controls select {
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 2px solid #ddd;
   border-radius: 8px;
   font-size: 14px;
+  transition: 0.3s;
 }
 
 .controls input {
   flex: 1;
   min-width: 250px;
+}
+
+.controls input:focus,
+.controls select:focus {
+  outline: none;
+  border-color: var(--orange);
 }
 
 /* =======================
@@ -224,14 +301,43 @@ tbody tr:hover {
   display: flex;
   justify-content: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 /* =======================
    RESPONSIVE DESIGN
 ======================= */
 @media screen and (max-width: 768px) {
+  .sidebar {
+    width: 70px;
+  }
+  
+  .sidebar .logo h4,
+  .sidebar a span {
+    display: none;
+  }
+  
+  .main-content {
+    margin-left: 70px;
+    width: calc(100% - 70px);
+    padding: 15px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-title h1 {
+    font-size: 1.5rem;
+  }
+
   .controls {
     flex-direction: column;
+  }
+
+  .controls input {
+    min-width: 100%;
   }
 
   .btn-add {
@@ -240,85 +346,132 @@ tbody tr:hover {
   }
 
   table, th, td {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .menu-image {
     width: 50px;
     height: 50px;
   }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .btn-edit, .btn-hapus {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .container {
+    padding: 15px;
+  }
+
+  .header-icon {
+    font-size: 1.5em;
+    padding: 8px;
+  }
+
+  table, th, td {
+    font-size: 12px;
+    padding: 8px 5px;
+  }
 }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="header">
-    <div class="header-left">
-      <div class="header-icon">🍽️</div>
-      <div class="header-title">
-        <h1>Data Menu</h1>
-        <div class="breadcrumb"><a href="admin.php">Dashboard</a> / Data Menu</div>
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="logo">
+    <i class="fas fa-utensils"></i>
+    <h4>Dapur Kuliner<br>Pak Ndut</h4>
+  </div>
+  <a href="admin.php"><i class="fas fa-user-shield"></i> <span>Data Admin</span></a>
+  <a href="pendataan_menu.php" class="active"><i class="fas fa-book"></i> <span>Data Menu</span></a>
+  <a href="transaksi.php"><i class="fas fa-shopping-cart"></i> <span>Transaksi</span></a>
+  <a href="generate_laporan.php"><i class="fas fa-file-alt"></i> <span>Laporan</span></a>
+  <a href="ulasan.php"><i class="fas fa-comment-dots"></i> <span>Ulasan</span></a>
+  <a href="login.php"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+  <div class="container">
+    <div class="header">
+      <div class="header-left">
+        <div class="header-icon">🍽️</div>
+        <div class="header-title">
+          <h1>Data Menu</h1>
+          <div class="breadcrumb"><a href="admin.php">Dashboard</a> / Data Menu</div>
+        </div>
+      </div>
+      <div class="header-buttons">
+        <a href="tambah_menu.php" class="btn btn-add">
+          <i class="fas fa-plus"></i> Tambah Menu
+        </a>
       </div>
     </div>
-    <div class="header-buttons">
-      <button class="btn btn-add" onclick="window.location.href='tambah_menu.php'">➕ Tambah Menu</button>
+
+    <div class="controls">
+      <input type="text" id="searchInput" placeholder="🔍 Cari nama menu..." onkeyup="filterTable()">
+      <select id="categoryFilter" onchange="filterTable()">
+        <option value="">Semua Kategori</option>
+        <option value="makanan">Makanan</option>
+        <option value="minuman">Minuman</option>
+      </select>
     </div>
-  </div>
 
-  <div class="controls">
-    <input type="text" id="searchInput" placeholder="Cari nama menu..." onkeyup="filterTable()">
-    <select id="categoryFilter" onchange="filterTable()">
-      <option value="">Semua Kategori</option>
-      <option value="makanan">Makanan</option>
-      <option value="minuman">Minuman</option>
-    </select>
-  </div>
-
-  <div class="table-container">
-    <table id="menuTable">
-      <thead>
-        <tr>
-          <th>NO</th>
-          <th>GAMBAR</th>
-          <th>NAMA MENU</th>
-          <th>KATEGORI</th>
-          <th>HARGA</th>
-          <th>STOK</th>
-          <th>AKSI</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php 
-        $no = 1;
-        while($row = mysqli_fetch_assoc($query)) { ?>
+    <div class="table-container">
+      <table id="menuTable">
+        <thead>
           <tr>
-            <td><?= $no++; ?></td>
-            <td>
-              <?php if (!empty($row['gambar_menu'])): ?>
-                <img src="img/<?= htmlspecialchars($row['gambar_menu']); ?>" 
-                     alt="<?= htmlspecialchars($row['nama_menu']); ?>" 
-                     class="menu-image">
-              <?php else: ?>
-                <img src="img/default.jpg" alt="No Image" class="menu-image">
-              <?php endif; ?>
-            </td>
-            <td class="menu-name"><?= htmlspecialchars($row['nama_menu']); ?></td>
-            <td><span class="menu-category"><?= ucfirst($row['jenis_menu']); ?></span></td>
-            <td class="menu-price">Rp <?= number_format($row['harga_menu'], 0, ',', '.'); ?></td>
-            <td class="menu-stock"><?= htmlspecialchars($row['stock_menu']); ?></td>
-            <td class="action-buttons">
-              <a href="edit_menu.php?id=<?= $row['id_menu']; ?>" class="btn-edit">✏️ Edit</a>
-              <a href="hapus_menu.php?id=<?= $row['id_menu']; ?>" 
-                 class="btn-hapus"
-                 onclick="return confirm('⚠️ Yakin ingin menghapus <?= addslashes($row['nama_menu']); ?>?')">
-                 🗑️ Hapus
-              </a>
-            </td>
+            <th>NO</th>
+            <th>GAMBAR</th>
+            <th>NAMA MENU</th>
+            <th>KATEGORI</th>
+            <th>HARGA</th>
+            <th>STOK</th>
+            <th>AKSI</th>
           </tr>
-        <?php } ?>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <?php 
+          $no = 1;
+          while($row = mysqli_fetch_assoc($query)) { ?>
+            <tr>
+              <td><?= $no++; ?></td>
+              <td>
+                <?php if (!empty($row['gambar_menu'])): ?>
+                  <img src="img/<?= htmlspecialchars($row['gambar_menu']); ?>" 
+                        alt="<?= htmlspecialchars($row['nama_menu']); ?>" 
+                        class="menu-image">
+                <?php else: ?>
+                  <img src="img/default.jpg" alt="No Image" class="menu-image">
+                <?php endif; ?>
+              </td>
+              <td class="menu-name"><?= htmlspecialchars($row['nama_menu']); ?></td>
+              <td><span class="menu-category"><?= ucfirst($row['jenis_menu']); ?></span></td>
+              <td class="menu-price">Rp <?= number_format($row['harga_menu'], 0, ',', '.'); ?></td>
+              <td class="menu-stock"><?= htmlspecialchars($row['stock_menu']); ?></td>
+              <td class="action-buttons">
+                <a href="edit_menu.php?id=<?= $row['id_menu']; ?>" class="btn-edit">
+                  <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="hapus_menu.php?id=<?= $row['id_menu']; ?>" 
+                    class="btn-hapus"
+                    onclick="return confirm('⚠️ Yakin ingin menghapus <?= addslashes($row['nama_menu']); ?>?')">
+                    <i class="fas fa-trash"></i> Hapus
+                </a>
+              </td>
+            </tr>
+          <?php } ?>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 

@@ -16,6 +16,7 @@ if (!$result) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generate Laporan Menu - Dapur Kuliner Pak Ndut</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -23,26 +24,87 @@ if (!$result) {
             box-sizing: border-box;
         }
 
+        :root {
+            --orange: #FF8C00;
+            --light-orange: #FFA726;
+            --text-dark: #333;
+            --shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+            background: linear-gradient(135deg, #FFF7E6, #FFD9A3);
             min-height: 100vh;
-            padding: 40px 20px;
+            display: flex;
+        }
+
+        /* =======================
+           SIDEBAR
+        ======================= */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, var(--orange), #FF8C00);
+            color: white;
+            box-shadow: var(--shadow);
+            position: fixed;
+            height: 100%;
+            padding-top: 30px;
+        }
+
+        .sidebar .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .sidebar .logo i {
+            font-size: 3rem;
+        }
+
+        .sidebar .logo h4 {
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #fff;
+            padding: 12px 25px;
+            margin: 5px 15px;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .sidebar a i {
+            margin-right: 10px;
+        }
+
+        /* =======================
+           MAIN CONTENT
+        ======================= */
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+            width: calc(100% - 250px);
         }
 
         .container {
-            max-width: 900px;
-            margin: 0 auto;
             background: white;
             border-radius: 20px;
-            padding: 50px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 40px;
+            box-shadow: var(--shadow);
         }
 
         h1 {
             color: #FF9800;
             text-align: center;
-            font-size: 2.5em;
+            font-size: 2.2em;
             margin-bottom: 20px;
         }
 
@@ -145,9 +207,22 @@ if (!$result) {
             box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
         }
 
+        /* =======================
+           PRINT STYLES
+        ======================= */
         @media print {
             body {
                 background: white;
+                display: block;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
                 padding: 0;
             }
 
@@ -165,11 +240,33 @@ if (!$result) {
             }
 
             .info {
-                display: none;
+                display: block;
+            }
+
+            h1 {
+                color: #000;
             }
         }
 
+        /* =======================
+           RESPONSIVE
+        ======================= */
         @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar .logo h4,
+            .sidebar a span {
+                display: none;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+                width: calc(100% - 70px);
+                padding: 15px;
+            }
+
             .container {
                 padding: 30px 20px;
             }
@@ -196,49 +293,86 @@ if (!$result) {
                 justify-content: center;
             }
         }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .data-table {
+                font-size: 0.8em;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 10px 8px;
+            }
+
+            .btn {
+                padding: 12px 20px;
+                font-size: 0.95em;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📋 Data Menu</h1>
-        <div class="info">
-            Dicetak pada: <?php echo date('d F Y, H:i'); ?> WIB | Total Menu: <?php echo mysqli_num_rows($result); ?>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-utensils"></i>
+            <h4>Dapur Kuliner<br>Pak Ndut</h4>
         </div>
+        <a href="admin.php"><i class="fas fa-user-shield"></i> <span>Data Admin</span></a>
+        <a href="pendataan_menu.php"><i class="fas fa-book"></i> <span>Data Menu</span></a>
+        <a href="transaksi.php"><i class="fas fa-shopping-cart"></i> <span>Transaksi</span></a>
+        <a href="generate_laporan.php" class="active"><i class="fas fa-file-alt"></i> <span>Laporan</span></a>
+        <a href="ulasan.php"><i class="fas fa-comment-dots"></i> <span>Ulasan</span></a>
+        <a href="login.php"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
+    </div>
 
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Nama Menu</th>
-                    <th>Kategori</th>
-                    <th>Harga</th>
-                </tr>
-            </thead>
-            <tbody id="menuTableBody">
-                <?php 
-                if (mysqli_num_rows($result) > 0) {
-                    // Loop untuk menampilkan setiap baris data dari database
-                    while ($row = mysqli_fetch_assoc($result)) {
-                        echo "<tr>";
-                        echo "<td>" . htmlspecialchars($row['nama_menu']) . "</td>";
-                        echo "<td>" . htmlspecialchars($row['jenis_menu']) . "</td>";
-                        echo "<td>Rp " . number_format($row['harga_menu'], 0, ',', '.') . "</td>";
-                        echo "</tr>";
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            <h1><i class="fas fa-file-alt"></i> Laporan Data Menu</h1>
+            <div class="info">
+                Dicetak pada: <?php echo date('d F Y, H:i'); ?> WIB | Total Menu: <?php echo mysqli_num_rows($result); ?>
+            </div>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nama Menu</th>
+                        <th>Kategori</th>
+                        <th>Harga</th>
+                    </tr>
+                </thead>
+                <tbody id="menuTableBody">
+                    <?php 
+                    if (mysqli_num_rows($result) > 0) {
+                        // Loop untuk menampilkan setiap baris data dari database
+                        while ($row = mysqli_fetch_assoc($result)) {
+                            echo "<tr>";
+                            echo "<td>" . htmlspecialchars($row['nama_menu']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['jenis_menu']) . "</td>";
+                            echo "<td>Rp " . number_format($row['harga_menu'], 0, ',', '.') . "</td>";
+                            echo "</tr>";
+                        }
+                    } else {
+                        // Jika tidak ada data
+                        echo "<tr><td colspan='3' class='empty-state'>⚠️ Tidak ada data menu di database</td></tr>";
                     }
-                } else {
-                    // Jika tidak ada data
-                    echo "<tr><td colspan='3' class='empty-state'>⚠️ Tidak ada data menu di database</td></tr>";
-                }
-                ?>
-            </tbody>
-        </table>
+                    ?>
+                </tbody>
+            </table>
 
-        <div class="button-container">
-            <button class="btn btn-primary" onclick="generatePDF()">
-                📄 Cetak PDF
-            </button>
-            <button class="btn btn-secondary" onclick="goBack()">
-                🔙 Kembali
-            </button>
+            <div class="button-container">
+                <button class="btn btn-primary" onclick="generatePDF()">
+                    <i class="fas fa-print"></i> Cetak PDF
+                </button>
+                <button class="btn btn-secondary" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </button>
+            </div>
         </div>
     </div>
 

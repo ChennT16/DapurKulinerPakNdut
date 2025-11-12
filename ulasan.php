@@ -25,96 +25,208 @@ $ulasan = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ulasan Pelanggan - Dapur Kuliner Pak Ndut</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            background: linear-gradient(135deg, #FFF7E6, #FFD9A3);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        :root {
+            --orange: #FF8C00;
+            --light-orange: #FFA726;
+            --text-dark: #333;
+            --shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #FFF7E6, #FFD9A3);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, var(--orange), #FF8C00);
+            color: white;
+            box-shadow: var(--shadow);
+            position: fixed;
+            height: 100%;
+            padding-top: 30px;
+        }
+
+        .sidebar .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .sidebar .logo i {
+            font-size: 3rem;
+        }
+
+        .sidebar .logo h4 {
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #fff;
+            padding: 12px 25px;
+            margin: 5px 15px;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .sidebar a i {
+            margin-right: 10px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+            width: calc(100% - 250px);
+        }
+
         /* Header */
         .page-header {
-            background-color: #FFA500;
-            color: white;
-            padding: 25px 30px;
+            background: white;
             border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            padding: 20px 25px;
+            box-shadow: var(--shadow);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 25px;
         }
+
         .page-header h2 {
+            color: var(--orange);
             font-weight: 700;
+            font-size: 1.8rem;
             margin: 0;
         }
 
-        /* Card Data */
+        /* Data Card */
         .data-card {
             background: white;
             border-radius: 15px;
             padding: 25px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow);
         }
 
-        /* Tabel */
+        /* Table */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 10px;
         }
-        thead {
-            background-color: #FF8C00;
+
+        table thead {
+            background: var(--orange);
             color: white;
         }
-        th, td {
+
+        table th, table td {
+            padding: 12px 15px;
             text-align: center;
-            vertical-align: middle;
-            padding: 12px;
+            border: 1px solid #ddd;
         }
-        tbody tr:nth-child(even) {
+
+        table tbody tr {
+            transition: 0.2s;
+        }
+
+        table tbody tr:nth-child(even) {
             background-color: #fff5ea;
         }
-        tbody tr:hover {
+
+        table tbody tr:hover {
             background-color: #ffe3c2;
         }
 
         /* Rating */
         .rating {
             color: #FFD700;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
         }
 
-        /* Sidebar (opsional jika mau dipakai juga) */
-        .sidebar {
-            background: linear-gradient(180deg, #FF8C00, #FF8C00);
-            min-height: 100vh;
-            width: 240px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            padding-top: 30px;
-            box-shadow: 3px 0 15px rgba(0,0,0,0.2);
-        }
-        .sidebar .logo {
+        .text-center {
             text-align: center;
-            color: white;
-            font-size: 1.3rem;
-            font-weight: bold;
-            margin-bottom: 25px;
-        }
-        .sidebar .nav-link {
-            color: white;
-            padding: 12px 20px;
-            border-radius: 10px;
-            margin: 5px 10px;
-        }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            background: rgba(255,255,255,0.2);
         }
 
-        .main-content {
-            margin-left: 260px;
-            padding: 30px;
+        .text-muted {
+            color: #6c757d;
+        }
+
+        .py-4 {
+            padding: 20px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar .logo h4,
+            .sidebar a span {
+                display: none;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+                width: calc(100% - 70px);
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .page-header h2 {
+                font-size: 1.5rem;
+            }
+
+            table th, table td {
+                padding: 8px 10px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 15px;
+            }
+
+            .page-header h2 {
+                font-size: 1.3rem;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            .rating {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
@@ -122,50 +234,50 @@ $ulasan = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="logo">
-            <i class="fas fa-utensils me-2"></i>Dapur Kuliner<br>Pak Ndut
+            <i class="fas fa-utensils"></i>
+            <h4>Dapur Kuliner<br>Pak Ndut</h4>
         </div>
-        <nav class="nav flex-column">
-            <a class="nav-link" href="admin.php"><i class="fas fa-home me-2"></i>Dashboard</a>
-            <a class="nav-link" href="data_admin.php"><i class="fas fa-user-shield me-2"></i>Data Admin</a>
-            <a class="nav-link" href="pendataan_menu.php"><i class="fas fa-book me-2"></i>Data Menu</a>
-            <a class="nav-link" href="data_transaksi.php"><i class="fas fa-shopping-cart me-2"></i>Transaksi</a>
-            <a class="nav-link" href="generate_laporan.php"><i class="fas fa-file-alt me-2"></i>Laporan</a>
-            <a class="nav-link active" href="ulasan.php"><i class="fas fa-comment-dots me-2"></i>Ulasan</a>
-            <a class="nav-link" href="login.php"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
-        </nav>
+        <a href="admin.php"><i class="fas fa-user-shield"></i> <span>Data Admin</span></a>
+        <a href="pendataan_menu.php"><i class="fas fa-book"></i> <span>Data Menu</span></a>
+        <a href="transaksi.php"><i class="fas fa-shopping-cart"></i> <span>Transaksi</span></a>
+        <a href="generate_laporan.php"><i class="fas fa-file-alt"></i> <span>Laporan</span></a>
+        <a href="ulasan.php" class="active"><i class="fas fa-comment-dots"></i> <span>Ulasan</span></a>
+        <a href="login.php"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
     </div>
 
     <!-- Konten Utama -->
     <div class="main-content">
         <div class="page-header">
-            <h2><i class="fas fa-comment-dots me-2"></i>Ulasan Pelanggan</h2>
+            <h2><i class="fas fa-comment-dots"></i> Ulasan Pelanggan</h2>
         </div>
 
         <div class="data-card">
-            <table class="table align-middle">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Nama Pelanggan</th>
-                        <th>Ulasan</th>
-                        <th>Rating</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (count($ulasan) > 0): ?>
-                        <?php $no = 1; foreach ($ulasan as $u): ?>
-                            <tr>
-                                <td><?= $no++ ?></td>
-                                <td><?= htmlspecialchars($u['nama']) ?></td>
-                                <td><?= htmlspecialchars($u['komentar']) ?></td>
-                                <td class="rating"><?= str_repeat('★', $u['rating']) . str_repeat('☆', 5 - $u['rating']) ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr><td colspan="5" class="text-center text-muted py-4">Belum ada ulasan pelanggan</td></tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Pelanggan</th>
+                            <th>Ulasan</th>
+                            <th>Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (count($ulasan) > 0): ?>
+                            <?php $no = 1; foreach ($ulasan as $u): ?>
+                                <tr>
+                                    <td><?= $no++ ?></td>
+                                    <td><?= htmlspecialchars($u['nama']) ?></td>
+                                    <td><?= htmlspecialchars($u['komentar']) ?></td>
+                                    <td class="rating"><?= str_repeat('★', $u['rating']) . str_repeat('☆', 5 - $u['rating']) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr><td colspan="4" class="text-center text-muted py-4">Belum ada ulasan pelanggan</td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </body>
