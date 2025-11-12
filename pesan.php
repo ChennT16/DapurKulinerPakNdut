@@ -1,4 +1,6 @@
 <?php
+include 'koneksi.php';
+
 // Proses jika ada request POST (dari AJAX)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Cek apakah ini request JSON
@@ -7,15 +9,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (stripos($contentType, 'application/json') !== false) {
         header('Content-Type: application/json');
         
-        // Koneksi database - SESUAIKAN DENGAN SETTING ANDA
-        $host = 'localhost';
-        $dbname = 'umkm';
-        $username = 'root';
-        $password = '';
-        
         try {
-            $conn = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            // Koneksi PDO untuk transaction
+            $pdo = new PDO("mysql:host=localhost;dbname=umkm;charset=utf8mb4", "root", "");
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
             // Ambil data dari request
             $inputJSON = file_get_contents('php://input');
@@ -26,34 +23,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             // Validasi data
-            if (empty($data['nama_pembeli']) || empty($data['items'])) {
-                throw new Exception('Data tidak lengkap - Nama pembeli atau items kosong');
+            if (empty($data['nama_pembeli'])) {
+                throw new Exception('Nama pembeli tidak boleh kosong');
+            }
+            
+            if (empty($data['items']) || !is_array($data['items'])) {
+                throw new Exception('Data pesanan tidak valid');
             }
             
             // Mulai transaksi
-            $conn->beginTransaction();
+            $pdo->beginTransaction();
             
-            // Insert ke tabel detail_transaksi_beli
-            $sql = "INSERT INTO detail_transaksi_beli 
-                    (id_transaksi_beli, nama_pembeli, tanggal_pembelian, jenis_barang, banyak_barang) 
-                    VALUES 
-                    (:id_transaksi, :nama_pembeli, :tanggal, :jenis_barang, :banyak_barang)";
+            // 1. Validasi stok untuk setiap item
+            foreach ($data['items'] as $item) {
+                $stmtCheck = $pdo->prepare("SELECT stock_menu, nama_menu FROM menu WHERE id_menu = ?");
+                $stmtCheck->execute([$item['id']]);
+                $menuData = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+                
+                if (!$menuData) {
+                    throw new Exception("Menu dengan ID {$item['id']} tidak ditemukan");
+                }
+                
+                if ($menuData['stock_menu'] < $item['quantity']) {
+                    throw new Exception("Stok {$menuData['nama_menu']} tidak mencukupi. Stok tersedia: {$menuData['stock_menu']}, diminta: {$item['quantity']}");
+                }
+            }
             
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([
+            // 2. Hitung jumlah total item
+            $jumlah_item = 0;
+            foreach ($data['items'] as $item) {
+                $jumlah_item += $item['quantity'];
+            }
+            
+            // 3. Convert items array ke JSON string
+            $detail_items_json = json_encode($data['items']);
+            
+            // 4. Insert transaksi ke tabel transaksi
+            $sqlTransaksi = "INSERT INTO transaksi 
+                            (id_transaksi, nama_pembeli, waktu, total_harga, jumlah_item, detail_items, status) 
+                            VALUES 
+                            (:id_transaksi, :nama_pembeli, NOW(), :total_harga, :jumlah_item, :detail_items, 'pending')";
+            
+            $stmtTransaksi = $pdo->prepare($sqlTransaksi);
+            $stmtTransaksi->execute([
                 ':id_transaksi' => $data['id_transaksi_beli'],
                 ':nama_pembeli' => $data['nama_pembeli'],
-                ':tanggal' => $data['tanggal_pembelian'],
-                ':jenis_barang' => $data['jenis_barang'],
-                ':banyak_barang' => $data['banyak_barang']
+                ':total_harga' => $data['total_harga'],
+                ':jumlah_item' => $jumlah_item,
+                ':detail_items' => $detail_items_json
             ]);
             
-            // Commit transaksi
-            $conn->commit();
+            // 5. Update stok menu untuk setiap item
+            foreach ($data['items'] as $item) {
+                $sqlUpdateStok = "UPDATE menu 
+                                 SET stock_menu = stock_menu - :quantity 
+                                 WHERE id_menu = :id_menu 
+                                 AND stock_menu >= :quantity";
+                
+                $stmtUpdate = $pdo->prepare($sqlUpdateStok);
+                $stmtUpdate->execute([
+                    ':quantity' => $item['quantity'],
+                    ':id_menu' => $item['id']
+                ]);
+                
+                // Cek apakah update berhasil
+                if ($stmtUpdate->rowCount() === 0) {
+                    throw new Exception("Gagal mengurangi stok menu {$item['name']}");
+                }
+            }
+            
+            // Commit transaksi jika semua berhasil
+            $pdo->commit();
             
             echo json_encode([
                 'success' => true,
-                'message' => 'Transaksi berhasil disimpan',
+                'message' => 'Pesanan berhasil disimpan! Silakan menunggu konfirmasi dari admin.',
                 'id_transaksi' => $data['id_transaksi_beli']
             ]);
             
@@ -61,8 +105,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
         } catch (PDOException $e) {
             // Rollback jika terjadi error
-            if (isset($conn)) {
-                $conn->rollBack();
+            if (isset($pdo) && $pdo->inTransaction()) {
+                $pdo->rollBack();
             }
             
             echo json_encode([
@@ -74,8 +118,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
         } catch (Exception $e) {
             // Rollback jika terjadi error
-            if (isset($conn)) {
-                $conn->rollBack();
+            if (isset($pdo) && $pdo->inTransaction()) {
+                $pdo->rollBack();
             }
             
             echo json_encode([
@@ -87,7 +131,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+// Ambil data menu dari database untuk ditampilkan
+$queryMenu = "SELECT id_menu, nama_menu, harga_menu, jenis_menu, stock_menu, gambar_menu 
+              FROM menu 
+              ORDER BY jenis_menu, nama_menu";
+$resultMenu = mysqli_query($conn, $queryMenu);
+
+$menuFromDB = [];
+if ($resultMenu) {
+    while ($row = mysqli_fetch_assoc($resultMenu)) {
+        $menuFromDB[] = [
+            'id' => (int)$row['id_menu'],
+            'name' => $row['nama_menu'],
+            'price' => (int)$row['harga_menu'],
+            'category' => $row['jenis_menu'],
+            'stock' => (int)$row['stock_menu'],
+            'image' => !empty($row['gambar_menu']) ? 'img/' . $row['gambar_menu'] : 'img/default.jpg'
+        ];
+    }
+}
+
+// Debug: Tampilkan jumlah menu yang berhasil dimuat
+$totalMenu = count($menuFromDB);
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -353,9 +421,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s;
+            font-size: 0.95em;
         }
 
-        .add-btn:hover {
+        .add-btn:hover:not(:disabled) {
             background: #F57C00;
             transform: scale(1.02);
         }
@@ -419,10 +488,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
         }
 
-        .customer-name-section input::placeholder {
-            color: #999;
-        }
-
         .cart-empty {
             text-align: center;
             color: #999;
@@ -459,6 +524,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 10px;
             margin-bottom: 12px;
             border: 1px solid #e5e7eb;
+            transition: all 0.3s;
+        }
+
+        .cart-item:hover {
+            border-color: #FF9800;
+            box-shadow: 0 2px 8px rgba(255, 152, 0, 0.1);
         }
 
         .cart-item-header {
@@ -489,46 +560,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .qty-btn {
-            width: 32px;
-            height: 32px;
+            width: 35px;
+            height: 35px;
             border: none;
-            background: #e5e7eb;
-            border-radius: 6px;
+            background: #FF9800;
+            color: white;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 1.1em;
+            font-size: 1.2em;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .qty-btn:hover {
-            background: #d1d5db;
+        .qty-btn:hover:not(:disabled) {
+            background: #F57C00;
+            transform: scale(1.1);
         }
 
         .qty-btn:disabled {
-            background: #f3f4f6;
+            background: #e0e0e0;
             cursor: not-allowed;
             opacity: 0.5;
+            transform: none;
         }
 
         .quantity {
             font-weight: bold;
-            min-width: 30px;
+            min-width: 40px;
             text-align: center;
+            font-size: 1.1em;
+            color: #333;
         }
 
         .remove-btn {
             background: #ef4444;
             color: white;
             border: none;
-            padding: 6px 14px;
-            border-radius: 6px;
+            padding: 8px 16px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 0.85em;
             transition: all 0.3s;
+            font-weight: 600;
         }
 
         .remove-btn:hover {
             background: #dc2626;
+            transform: scale(1.05);
         }
 
         .cart-total {
@@ -567,7 +648,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flex-shrink: 0;
         }
 
-        .checkout-btn:hover {
+        .checkout-btn:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
         }
@@ -576,6 +657,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: #ccc;
             cursor: not-allowed;
             transform: none;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #333;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            z-index: 9999;
+            animation: slideIn 0.3s ease-out;
+            display: none;
+        }
+
+        .toast.success {
+            background: #4CAF50;
+        }
+
+        .toast.error {
+            background: #ef4444;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
         @media (max-width: 1024px) {
@@ -649,7 +768,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         type="text" 
                         id="namaPembeli" 
                         placeholder="Masukkan nama Anda..."
-                        maxlength="50"
+                        maxlength="100"
+                        required
                     >
                 </div>
 
@@ -660,40 +780,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-    <script>
-        // Data menu dengan stok dari database
-        const menuData = [
-            { id: 1, name: 'Pentol Bakar', price: 1000, category: 'Pentol', image: 'img/PENTOL BAKAR.jpg', stock: 250 },
-            { id: 11111, name: 'Pentol', price: 5000, category: 'Pentol', image: 'img/PENTOL.jpg', stock: 250 },
-            { id: 11112, name: 'Pentol Tahu', price: 5000, category: 'Pentol', image: 'img/PENTOL TAHU.jpg', stock: 250 },
-            { id: 11119, name: 'Tahu Bakar', price: 1000, category: 'Pentol', image: 'img/TAHU BAKAR.jpg', stock: 250 },
-            { id: 11, name: 'Gorengan Pangsit', price: 1000, category: 'Pentol', image: 'img/GORENGAN PANGSIT.jpg', stock: 250 },
-            
-            { id: 1121, name: 'Nasi Bento Ayam Katsu', price: 10000, category: 'Nasi Bento', image: 'img/NASI BENTO KATSU.jpg', stock: 250 },
-            { id: 1122, name: 'Nasi Bento Ayam Crispy', price: 10000, category: 'Nasi Bento', image: 'img/NASI BENTO AYAM CRISPY.jpg', stock: 250 },
-            { id: 1123, name: 'Nasi Bento Ayam Geprek', price: 10000, category: 'Nasi Bento', image: 'img/NASI BENTO GEPREK.jpg', stock: 250 },
-            { id: 1124, name: 'Nasi Bento Daging Sosis', price: 10000, category: 'Nasi Bento', image: 'img/NASI BENTO DAGING DAN SOSIS.jpg', stock: 250 },
-            { id: 1125, name: 'Nasi Bento Rica-Rica Balungan', price: 8000, category: 'Nasi Bento', image: 'img/NASI BENTO RICA RICA BALUNGAN.jpg', stock: 250 },
-            { id: 1126, name: 'Nasi Bento Ati Ampela', price: 8000, category: 'Nasi Bento', image: 'img/NASI BENTO ATI AMPELA (1).jpg', stock: 250 },
-            { id: 11118, name: 'Rica-Rica Balungan', price: 6000, category: 'Nasi Bento', image: 'img/RICA RICA BALUNGAN.jpg', stock: 250 },
-            
-            { id: 11117, name: 'Susu Kedelai', price: 5000, category: 'Minuman', image: 'img/SUSU KEDELAI.jpg', stock: 250 },
-            { id: 11115, name: 'Es Kuwut', price: 3000, category: 'Minuman', image: 'img/ES KUWUT.jpg', stock: 250 },
-            { id: 11116, name: 'Es Rasa-Rasa', price: 3000, category: 'Minuman', image: 'img/ES RASA RASA.jpg', stock: 250 },
-            { id: 11113, name: 'Es Teh', price: 3000, category: 'Minuman', image: 'img/ES TEH.jpg', stock: 250 },
-            { id: 11114, name: 'Es Lemon Tea', price: 3000, category: 'Minuman', image: 'img/LEMON TEA.jpg', stock: 250 },
-            { id: 1171, name: 'Air Mineral', price: 3000, category: 'Minuman', image: 'img/AIR MINERAL.jpg', stock: 250 }
-        ];
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
 
+    <script>
+        // Data menu dari database PHP
+        const menuData = <?php echo json_encode($menuFromDB); ?>;
+        
+        // Debug: Cek data menu berhasil dimuat
+        console.log('📋 Total menu dimuat:', menuData.length);
+        console.log('📦 Data menu:', menuData);
+        
+        // Cek jika data kosong
+        if (menuData.length === 0) {
+            alert('⚠️ PERINGATAN: Data menu kosong!\n\nSilakan hubungi admin untuk mengisi data menu.');
+        }
+        
         let cart = [];
         let currentCategory = 'Semua';
 
+        // ============ HELPER FUNCTIONS ============
         function formatRupiah(amount) {
             return 'Rp ' + amount.toLocaleString('id-ID');
         }
 
         function goBack() {
             window.history.back();
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
         }
 
         function getStockStatus(stock) {
@@ -708,6 +830,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             return `✅ ${stock}`;
         }
 
+        // ============ DISPLAY MENU ============
         function displayMenu() {
             const menuGrid = document.getElementById('menuGrid');
             const filteredMenu = currentCategory === 'Semua' 
@@ -716,6 +839,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             menuGrid.innerHTML = '';
 
+            if (filteredMenu.length === 0) {
+                menuGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">Tidak ada menu tersedia</div>';
+                return;
+            }
+
             filteredMenu.forEach(item => {
                 const stockStatus = getStockStatus(item.stock);
                 const isOutOfStock = item.stock === 0;
@@ -723,7 +851,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const menuCard = document.createElement('div');
                 menuCard.className = 'menu-card' + (isOutOfStock ? ' out-of-stock' : '');
                 
-                // Stock badge
                 const stockBadge = document.createElement('div');
                 stockBadge.className = `stock-badge ${stockStatus === 'out' ? 'out-of-stock' : stockStatus === 'low' ? 'low-stock' : 'in-stock'}`;
                 stockBadge.textContent = getStockBadgeText(item.stock);
@@ -756,8 +883,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             Stok: ${item.stock}
                         </div>
                     </div>
-                    <button class="add-btn" onclick="addToCart(${item.id})" ${isOutOfStock ? 'disabled' : ''}>
-                        ${isOutOfStock ? '❌ Stok Habis' : '+ Tambah'}
+                    <button class="add-btn" onclick="addToCart(${item.id})" ${isOutOfStock ? 'disabled' : ''} data-id="${item.id}">
+                        ${isOutOfStock ? '❌ Stok Habis' : '+ Tambah ke Keranjang'}
                     </button>
                 `;
                 
@@ -768,6 +895,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
         }
 
+        // ============ FILTER CATEGORY ============
         function filterCategory(category) {
             currentCategory = category;
             
@@ -779,31 +907,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             displayMenu();
         }
 
+        // ============ ADD TO CART ============
         function addToCart(itemId) {
+            console.log('addToCart called with ID:', itemId);
+            console.log('menuData:', menuData);
+            
+            // Pastikan itemId adalah number
+            itemId = parseInt(itemId);
+            
             const item = menuData.find(m => m.id === itemId);
-            if (!item || item.stock === 0) return;
+            console.log('Found item:', item);
+            
+            if (!item) {
+                showToast('Menu tidak ditemukan!', 'error');
+                console.error('Item not found with ID:', itemId);
+                return;
+            }
+            
+            if (item.stock === 0) {
+                showToast('Stok menu habis!', 'error');
+                return;
+            }
 
             const cartItem = cart.find(c => c.id === itemId);
             const currentQty = cartItem ? cartItem.quantity : 0;
             
-            // Cek apakah melebihi stok
+            // Cek apakah sudah mencapai stok maksimal
             if (currentQty >= item.stock) {
-                alert(`Maaf, stok ${item.name} hanya tersedia ${item.stock} item`);
+                showToast(`Stok ${item.name} hanya tersedia ${item.stock} item`, 'error');
                 return;
             }
 
             if (cartItem) {
                 cartItem.quantity++;
+                showToast(`${item.name} ditambahkan (${cartItem.quantity})`, 'success');
             } else {
                 cart.push({
-                    ...item,
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    category: item.category,
+                    stock: item.stock,
+                    image: item.image,
                     quantity: 1
                 });
+                showToast(`${item.name} ditambahkan ke keranjang`, 'success');
             }
 
             updateCart();
         }
 
+        // ============ UPDATE QUANTITY ============
         function updateQuantity(itemId, change) {
             const item = menuData.find(m => m.id === itemId);
             const cartItem = cart.find(c => c.id === itemId);
@@ -811,26 +965,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             const newQty = cartItem.quantity + change;
 
-            // Cek batas stok
+            // Cek jika melebihi stok
             if (newQty > item.stock) {
-                alert(`Maaf, stok ${item.name} hanya tersedia ${item.stock} item`);
+                showToast(`Stok ${item.name} hanya tersedia ${item.stock} item`, 'error');
                 return;
             }
 
+            // Update quantity
             cartItem.quantity = newQty;
 
+            // Jika quantity <= 0, hapus dari cart
             if (cartItem.quantity <= 0) {
                 removeFromCart(itemId);
+                return;
+            }
+
+            // Tampilkan notifikasi
+            if (change > 0) {
+                showToast(`${item.name} ditambah menjadi ${newQty}`, 'success');
             } else {
+                showToast(`${item.name} dikurangi menjadi ${newQty}`, 'success');
+            }
+
+            updateCart();
+        }
+
+        // ============ REMOVE FROM CART ============
+        function removeFromCart(itemId) {
+            const item = cart.find(c => c.id === itemId);
+            if (item) {
+                const itemName = item.name;
+                cart = cart.filter(c => c.id !== itemId);
+                showToast(`${itemName} dihapus dari keranjang`, 'success');
                 updateCart();
             }
         }
 
-        function removeFromCart(itemId) {
-            cart = cart.filter(item => item.id !== itemId);
-            updateCart();
-        }
-
+        // ============ UPDATE CART DISPLAY ============
         function updateCart() {
             const cartContent = document.getElementById('cartContent');
 
@@ -844,20 +1015,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             cart.forEach(item => {
                 const menuItem = menuData.find(m => m.id === item.id);
                 const canIncrease = item.quantity < menuItem.stock;
+                const subtotal = item.price * item.quantity;
                 
                 html += `
                     <div class="cart-item">
                         <div class="cart-item-header">
                             <h5>${item.name}</h5>
-                            <div class="cart-item-price">${formatRupiah(item.price)} x ${item.quantity} = ${formatRupiah(item.price * item.quantity)}</div>
+                            <div class="cart-item-price">${formatRupiah(item.price)} × ${item.quantity} = ${formatRupiah(subtotal)}</div>
                         </div>
                         <div class="cart-item-controls">
                             <div class="quantity-controls">
-                                <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">-</button>
+                                <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)" title="Kurangi">−</button>
                                 <span class="quantity">${item.quantity}</span>
-                                <button class="qty-btn" onclick="updateQuantity(${item.id}, 1)" ${!canIncrease ? 'disabled title="Stok maksimal tercapai"' : ''}>+</button>
+                                <button class="qty-btn" onclick="updateQuantity(${item.id}, 1)" ${!canIncrease ? 'disabled' : ''} title="${canIncrease ? 'Tambah' : 'Stok maksimal'}">+</button>
                             </div>
-                            <button class="remove-btn" onclick="removeFromCart(${item.id})">Hapus</button>
+                            <button class="remove-btn" onclick="removeFromCart(${item.id})" title="Hapus item">🗑️ Hapus</button>
                         </div>
                     </div>
                 `;
@@ -865,6 +1037,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             html += '</div>';
 
+            // Hitung total
             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
@@ -872,7 +1045,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="cart-total">
                     <div class="total-row">
                         <span>Jumlah Item:</span>
-                        <span>${totalItems} item</span>
+                        <span><strong>${totalItems} item</strong></span>
                     </div>
                     <div class="total-row">
                         <span>Subtotal:</span>
@@ -883,22 +1056,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <span>${formatRupiah(subtotal)}</span>
                     </div>
                 </div>
-                <button class="checkout-btn" onclick="checkout()">🛍️ Konfirmasi Pesanan</button>
+                <button class="checkout-btn" onclick="checkout()">🛍️ Konfirmasi Pesanan (${totalItems} item)</button>
             `;
 
             cartContent.innerHTML = html;
         }
 
+        // ============ CHECKOUT ============
         function checkout() {
             if (cart.length === 0) {
-                alert('Keranjang masih kosong!');
+                showToast('Keranjang masih kosong!', 'error');
                 return;
             }
 
             const namaPembeli = document.getElementById('namaPembeli').value.trim();
             
             if (!namaPembeli) {
-                alert('⚠️ Mohon isi nama pembeli terlebih dahulu!');
+                showToast('Mohon isi nama pembeli terlebih dahulu!', 'error');
+                document.getElementById('namaPembeli').focus();
+                return;
+            }
+
+            // Validasi nama minimal 3 karakter
+            if (namaPembeli.length < 3) {
+                showToast('Nama pembeli minimal 3 karakter!', 'error');
                 document.getElementById('namaPembeli').focus();
                 return;
             }
@@ -914,9 +1095,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const transaksiData = {
                 id_transaksi_beli: idTransaksi,
                 nama_pembeli: namaPembeli,
-                tanggal_pembelian: new Date().toISOString().split('T')[0],
-                jenis_barang: cart.map(item => item.name).join(', '),
-                banyak_barang: itemCount,
+                total_harga: total,
                 items: cart.map(item => ({
                     id: item.id,
                     name: item.name,
@@ -926,12 +1105,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }))
             };
 
-            // Simpan ke database
-            saveTransaction(transaksiData, namaPembeli, total, itemCount, idTransaksi);
+            // Konfirmasi pesanan
+            const confirmation = confirm(
+                `📋 KONFIRMASI PESANAN\n\n` +
+                `Nama: ${namaPembeli}\n` +
+                `Total Item: ${itemCount}\n` +
+                `Total Bayar: ${formatRupiah(total)}\n\n` +
+                `Lanjutkan pesanan?`
+            );
+
+            if (confirmation) {
+                saveTransaction(transaksiData, namaPembeli, total, itemCount, idTransaksi);
+            }
         }
 
+        // ============ SAVE TRANSACTION ============
         async function saveTransaction(transaksiData, namaPembeli, total, itemCount, idTransaksi) {
             try {
+                // Tampilkan loading
+                const checkoutBtn = document.querySelector('.checkout-btn');
+                const originalText = checkoutBtn.innerHTML;
+                checkoutBtn.disabled = true;
+                checkoutBtn.innerHTML = '⏳ Memproses pesanan...';
+
                 const response = await fetch('pesan.php', {
                     method: 'POST',
                     headers: {
@@ -943,37 +1139,184 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const result = await response.json();
 
                 if (result.success) {
-                    let orderDetails = '✅ PESANAN BERHASIL DISIMPAN!\n\n';
+                    // Buat detail pesanan untuk alert
+                    let orderDetails = '✅ PESANAN BERHASIL!\n\n';
+                    orderDetails += `━━━━━━━━━━━━━━━━━━━━\n`;
                     orderDetails += `ID Transaksi: ${idTransaksi}\n`;
                     orderDetails += `Nama Pembeli: ${namaPembeli}\n`;
-                    orderDetails += `Tanggal: ${new Date().toLocaleDateString('id-ID')}\n\n`;
-                    orderDetails += '=== DETAIL PESANAN ===\n\n';
+                    orderDetails += `Tanggal: ${new Date().toLocaleDateString('id-ID', {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}\n`;
+                    orderDetails += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+                    orderDetails += '📋 DETAIL PESANAN:\n\n';
+                    
                     cart.forEach(item => {
-                        orderDetails += `${item.name}\n`;
-                        orderDetails += `${item.quantity} x ${formatRupiah(item.price)} = ${formatRupiah(item.price * item.quantity)}\n\n`;
+                        orderDetails += `• ${item.name}\n`;
+                        orderDetails += `  ${item.quantity}x @ ${formatRupiah(item.price)} = ${formatRupiah(item.price * item.quantity)}\n\n`;
                     });
+                    
                     orderDetails += `━━━━━━━━━━━━━━━━━━━━\n`;
-                    orderDetails += `Total: ${formatRupiah(total)}\n`;
-                    orderDetails += `Jumlah Item: ${itemCount}\n\n`;
-                    orderDetails += '✅ Terima kasih telah memesan di Dapur Kuliner Pak Ndut!';
+                    orderDetails += `Jumlah Item: ${itemCount}\n`;
+                    orderDetails += `TOTAL BAYAR: ${formatRupiah(total)}\n`;
+                    orderDetails += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+                    orderDetails += '⏳ Status: Menunggu Konfirmasi Admin\n\n';
+                    orderDetails += 'Pesanan Anda akan segera diproses.\n';
+                    orderDetails += 'Terima kasih telah memesan!\n';
+                    orderDetails += '🏪 Dapur Kuliner Pak Ndut';
 
                     alert(orderDetails);
 
-                    // Reset cart dan nama pembeli
+                    // Reset form
                     cart = [];
                     document.getElementById('namaPembeli').value = '';
                     updateCart();
+                    
+                    showToast('Pesanan berhasil! Halaman akan direfresh...', 'success');
+                    
+                    // Reload halaman untuk update stok
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
                 } else {
-                    alert('❌ Terjadi kesalahan: ' + result.message);
+                    alert('❌ PESANAN GAGAL\n\n' + result.message);
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.innerHTML = originalText;
+                    showToast('Pesanan gagal: ' + result.message, 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('❌ Terjadi kesalahan saat menyimpan pesanan. Silakan coba lagi.');
+                alert('❌ Terjadi kesalahan saat menyimpan pesanan.\n\nSilakan coba lagi atau hubungi admin.');
+                
+                const checkoutBtn = document.querySelector('.checkout-btn');
+                checkoutBtn.disabled = false;
+                checkoutBtn.innerHTML = '🛍️ Konfirmasi Pesanan';
+                
+                showToast('Terjadi kesalahan koneksi!', 'error');
             }
         }
 
-        // Inisialisasi tampilan menu
-        displayMenu();
+        // ============ KEYBOARD SHORTCUTS ============
+        document.addEventListener('keydown', function(e) {
+            // ESC untuk clear cart
+            if (e.key === 'Escape' && cart.length > 0) {
+                if (confirm('Kosongkan keranjang?')) {
+                    cart = [];
+                    updateCart();
+                    showToast('Keranjang dikosongkan', 'success');
+                }
+            }
+            
+            // Ctrl+Enter untuk checkout
+            if (e.ctrlKey && e.key === 'Enter') {
+                checkout();
+            }
+        });
+
+        // ============ AUTO-SAVE CART TO LOCALSTORAGE ============
+        function saveCartToStorage() {
+            try {
+                localStorage.setItem('cart', JSON.stringify(cart));
+                localStorage.setItem('namaPembeli', document.getElementById('namaPembeli').value);
+            } catch (e) {
+                console.error('Gagal menyimpan cart:', e);
+            }
+        }
+
+        function loadCartFromStorage() {
+            try {
+                const savedCart = localStorage.getItem('cart');
+                const savedName = localStorage.getItem('namaPembeli');
+                
+                if (savedCart) {
+                    cart = JSON.parse(savedCart);
+                    updateCart();
+                }
+                
+                if (savedName) {
+                    document.getElementById('namaPembeli').value = savedName;
+                }
+            } catch (e) {
+                console.error('Gagal memuat cart:', e);
+            }
+        }
+
+        // Auto-save setiap perubahan
+        function updateCart() {
+            const cartContent = document.getElementById('cartContent');
+
+            if (cart.length === 0) {
+                cartContent.innerHTML = '<div class="cart-empty">Keranjang masih kosong<br>Silakan pilih menu</div>';
+                saveCartToStorage();
+                return;
+            }
+
+            let html = '<div class="cart-items">';
+            
+            cart.forEach(item => {
+                const menuItem = menuData.find(m => m.id === item.id);
+                const canIncrease = item.quantity < menuItem.stock;
+                const subtotal = item.price * item.quantity;
+                
+                html += `
+                    <div class="cart-item">
+                        <div class="cart-item-header">
+                            <h5>${item.name}</h5>
+                            <div class="cart-item-price">${formatRupiah(item.price)} × ${item.quantity} = ${formatRupiah(subtotal)}</div>
+                        </div>
+                        <div class="cart-item-controls">
+                            <div class="quantity-controls">
+                                <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)" title="Kurangi">−</button>
+                                <span class="quantity">${item.quantity}</span>
+                                <button class="qty-btn" onclick="updateQuantity(${item.id}, 1)" ${!canIncrease ? 'disabled' : ''} title="${canIncrease ? 'Tambah' : 'Stok maksimal'}">+</button>
+                            </div>
+                            <button class="remove-btn" onclick="removeFromCart(${item.id})" title="Hapus item">🗑️ Hapus</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            html += `
+                <div class="cart-total">
+                    <div class="total-row">
+                        <span>Jumlah Item:</span>
+                        <span><strong>${totalItems} item</strong></span>
+                    </div>
+                    <div class="total-row">
+                        <span>Subtotal:</span>
+                        <span>${formatRupiah(subtotal)}</span>
+                    </div>
+                    <div class="total-row final">
+                        <span>Total Bayar:</span>
+                        <span>${formatRupiah(subtotal)}</span>
+                    </div>
+                </div>
+                <button class="checkout-btn" onclick="checkout()">🛍️ Konfirmasi Pesanan (${totalItems} item)</button>
+            `;
+
+            cartContent.innerHTML = html;
+            saveCartToStorage();
+        }
+
+        // Auto-save nama pembeli
+        document.getElementById('namaPembeli').addEventListener('input', saveCartToStorage);
+
+        // ============ INITIALIZE ============
+        window.addEventListener('DOMContentLoaded', function() {
+            loadCartFromStorage();
+            displayMenu();
+            
+            console.log('🍽️ Sistem pemesanan siap!');
+            console.log('📋 Shortcut: ESC = Clear cart, Ctrl+Enter = Checkout');
+        });
     </script>
 </body>
 </html>
