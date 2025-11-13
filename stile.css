@@ -139,7 +139,7 @@ nav {
 
 /* Sections */
 section {
-    padding: 80px 5%;
+    padding: 100px 5%;
     max-width: 1400px;
     margin: 0 auto;
 }
@@ -148,7 +148,8 @@ section {
     text-align: center;
     font-size: 42px;
     color: #333;
-    margin-bottom: 50px;
+    margin-bottom: 60px;
+    padding-top: 20px;
     position: relative;
     animation: fadeInUp 1s ease;
 }
