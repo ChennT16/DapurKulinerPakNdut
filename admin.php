@@ -62,49 +62,117 @@ $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
     --text-dark: #333;
     --shadow: 0 8px 25px rgba(0,0,0,0.1);
 }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 body {
     font-family: 'Segoe UI', sans-serif;
     background: linear-gradient(135deg, #FFF7E6, #FFD9A3);
     min-height: 100vh;
-    display: flex;
-    margin: 0;
 }
+
+/* Sidebar Styles */
 .sidebar {
-    width: 250px;
+    width: 80px;
     background: linear-gradient(180deg, var(--orange), #FF8C00);
     color: white;
     box-shadow: var(--shadow);
     position: fixed;
     height: 100%;
-    padding-top: 30px;
+    padding-top: 20px;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+.sidebar:hover {
+    width: 250px;
+}
+.sidebar.mobile-hidden {
+    transform: translateX(-100%);
 }
 .sidebar .logo {
     text-align: center;
     margin-bottom: 30px;
+    padding: 0 15px;
+    overflow: hidden;
 }
 .sidebar .logo i {
+    font-size: 2.5rem;
+    transition: font-size 0.3s ease;
+}
+.sidebar:hover .logo i {
     font-size: 3rem;
 }
 .sidebar .logo h4 {
     margin-top: 10px;
     font-weight: bold;
+    font-size: 0;
+    opacity: 0;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+.sidebar:hover .logo h4 {
+    font-size: 1.1rem;
+    opacity: 1;
 }
 .sidebar a {
-    display: block;
+    display: flex;
+    align-items: center;
     color: #fff;
-    padding: 12px 25px;
-    margin: 5px 15px;
-    border-radius: 10px;
+    padding: 15px 0;
+    margin: 5px 0;
     text-decoration: none;
-    transition: 0.3s;
+    transition: all 0.3s;
+    position: relative;
+    justify-content: center;
+}
+.sidebar:hover a {
+    justify-content: flex-start;
+    padding: 15px 25px;
 }
 .sidebar a:hover, .sidebar a.active {
     background: rgba(255,255,255,0.2);
 }
+.sidebar a i {
+    font-size: 1.5rem;
+    min-width: 40px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+.sidebar:hover a i {
+    font-size: 1.2rem;
+    margin-right: 15px;
+    min-width: 30px;
+}
+.sidebar a span {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+.sidebar:hover a span {
+    opacity: 1;
+    width: auto;
+}
+
+/* Mobile Toggle Button */
+.mobile-toggle {
+    display: none;
+}
+
+/* Overlay for mobile */
+.sidebar-overlay {
+    display: none;
+}
+
+/* Main Content */
 .main {
-    margin-left: 250px;
+    margin-left: 80px;
     padding: 30px;
-    width: calc(100% - 250px);
+    width: calc(100% - 80px);
+    transition: all 0.3s ease;
 }
 .header {
     background: white;
@@ -114,10 +182,13 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 .header h2 {
     color: var(--orange);
     font-weight: 700;
+    font-size: 1.5rem;
 }
 .btn-orange {
     background: var(--orange);
@@ -126,6 +197,7 @@ body {
     border-radius: 10px;
     padding: 10px 20px;
     transition: 0.3s;
+    white-space: nowrap;
 }
 .btn-orange:hover {
     background: #FF7000;
@@ -168,6 +240,7 @@ body {
     border-radius: 8px;
     padding: 8px 12px;
     transition: 0.2s;
+    margin: 2px;
 }
 .btn-edit { background: #DBEAFE; color: #1E40AF; }
 .btn-edit:hover { background: #3B82F6; color: white; }
@@ -182,20 +255,119 @@ body {
     border-color: var(--orange);
     box-shadow: 0 0 0 3px rgba(255,140,0,0.1);
 }
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 80px;
+        transform: translateX(0);
+    }
+    .sidebar:hover {
+        width: 80px;
+    }
+    .sidebar.mobile-active {
+        width: 250px;
+    }
+    .sidebar.mobile-active a {
+        justify-content: flex-start;
+        padding: 15px 25px;
+    }
+    .sidebar.mobile-active a i {
+        font-size: 1.2rem;
+        margin-right: 15px;
+        min-width: 30px;
+    }
+    .sidebar.mobile-active a span {
+        opacity: 1;
+        width: auto;
+    }
+    .sidebar.mobile-active .logo h4 {
+        font-size: 1.1rem;
+        opacity: 1;
+    }
+    .sidebar.mobile-active .logo i {
+        font-size: 3rem;
+    }
+    .mobile-toggle {
+        display: none;
+    }
+    .main {
+        margin-left: 80px;
+        width: calc(100% - 80px);
+        padding: 30px 15px 20px;
+    }
+    .header {
+        padding: 15px;
+    }
+    .header h2 {
+        font-size: 1.2rem;
+    }
+    .card {
+        padding: 15px;
+    }
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+    .btn-edit, .btn-delete {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .header h2 {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    .btn-orange {
+        width: 100%;
+        text-align: center;
+    }
+    .table {
+        font-size: 0.85rem;
+    }
+    .table th, .table td {
+        padding: 8px 5px;
+    }
+}
 </style>
 </head>
 <body>
-<div class="sidebar">
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
     <div class="logo">
         <i class="fas fa-utensils"></i>
         <h4>Dapur Kuliner<br>Pak Ndut</h4>
     </div>
-    <a href="admin.php" class="active"><i class="fas fa-user-shield me-2"></i> Data Admin</a>
-    <a href="pendataan_menu.php"><i class="fas fa-book me-2"></i> Menu</a>
-    <a href="transaksi.php"><i class="fas fa-shopping-cart me-2"></i> Transaksi</a>
-    <a href="generate_laporan.php"><i class="fas fa-file-alt me-2"></i> Laporan</a>
-    <a href="ulasan.php"><i class="fas fa-comment-dots me-2"></i> Ulasan</a>
-    <a href="login.php"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
+    <a href="admin.php" class="active">
+        <i class="fas fa-user-shield"></i>
+        <span>Data Admin</span>
+    </a>
+    <a href="pendataan_menu.php">
+        <i class="fas fa-book"></i>
+        <span>Menu</span>
+    </a>
+    <a href="transaksi.php">
+        <i class="fas fa-shopping-cart"></i>
+        <span>Transaksi</span>
+    </a>
+    <a href="generate_laporan.php">
+        <i class="fas fa-file-alt"></i>
+        <span>Laporan</span>
+    </a>
+    <a href="ulasan.php">
+        <i class="fas fa-comment-dots"></i>
+        <span>Ulasan</span>
+    </a>
+    <a href="login.php">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+    </a>
 </div>
 
 <div class="main">
@@ -306,6 +478,31 @@ body {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+// Toggle Sidebar untuk Mobile - tap icon untuk expand
+const sidebar = document.getElementById('sidebar');
+let touchStartX = 0;
+
+// Toggle sidebar saat tap pada area sidebar di mobile
+sidebar.addEventListener('click', function(e) {
+    if (window.innerWidth <= 768) {
+        sidebar.classList.toggle('mobile-active');
+    }
+});
+
+// Tutup sidebar jika tap di luar sidebar pada mobile saat expanded
+document.addEventListener('click', function(e) {
+    if (window.innerWidth <= 768) {
+        if (!sidebar.contains(e.target) && sidebar.classList.contains('mobile-active')) {
+            sidebar.classList.remove('mobile-active');
+        }
+    }
+});
+
+// Prevent close when clicking inside sidebar
+sidebar.addEventListener('click', function(e) {
+    e.stopPropagation();
+});
+
 function editAdmin(a){
     document.getElementById('edit_id').value=a.id;
     document.getElementById('edit_nama').value=a.nama;
@@ -314,6 +511,7 @@ function editAdmin(a){
     document.getElementById('edit_telepon').value=a.telepon;
     new bootstrap.Modal(document.getElementById('modalEdit')).show();
 }
+
 function hapusAdmin(id,nama){
     Swal.fire({
         title:'Hapus Admin?',
