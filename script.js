@@ -1,7 +1,7 @@
 // =======================
 // MOBILE NAVIGATION
 // =======================
-const burger = document.getElementById('burger');
+const burger = document.getElementById('PakNdut');
 const navLinks = document.getElementById('navLinks');
 
 if (burger && navLinks) {

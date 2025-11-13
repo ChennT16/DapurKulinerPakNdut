@@ -601,9 +601,6 @@ $stats = $stmtStats->fetch(PDO::FETCH_ASSOC);
         </div>
         <nav class="nav flex-column">
             <a class="nav-link" href="admin.php">
-                <i class="fas fa-home"></i> <span>Dashboard</span>
-            </a>
-            <a class="nav-link" href="admin.php">
                 <i class="fas fa-user-shield"></i> <span>Data Admin</span>
             </a>
             <a class="nav-link" href="pendataan_menu.php">
@@ -787,7 +784,7 @@ $stats = $stmtStats->fetch(PDO::FETCH_ASSOC);
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: `action=update_status&id_transaksi=${id}&status=${newStatus}`
+                body: action=update_status&id_transaksi=${id}&status=${newStatus}
             })
             .then(response => response.json())
             .then(data => {
