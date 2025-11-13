@@ -1,0 +1,176 @@
+<?php
+// Memulai session
+session_start();
+
+// Include file koneksi database yang sudah ada
+include 'koneksi.php';
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dapur Pak Ndut - UMKM Kuliner Terbaik</title>
+    <link rel="stylesheet" href="stile.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header id="header">
+        <nav>
+            <a href="#tentang" class="logo">
+                <div class="logo-icon">👨‍🍳</div>
+                <span>Dapur Kuliner Pak Ndut</span>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#beranda">Beranda</a></li>
+                <li><a href="#tentang">Tentang</a></li>
+                <li><a href="#menu">Menu</a></li>
+                <li><a href="#kontak">Kontak</a></li>
+                <li><a href="login.php" class="login-btn">Login</a></li>
+            </ul>
+            <div class="PakNdut" id="PakNdut">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </nav>
+    </header>
+
+    <section id="beranda">
+    </section>
+
+    <section id="tentang">
+        <h2 class="section-title">Tentang Kami</h2>
+        <div class="tentang-content">
+            <div class="tentang-text">
+                <h3>UMKM Dapur Kuliner Pak Ndut</h3>
+                <p>Dapur Pak Ndut adalah UMKM kuliner yang berkomitmen menyajikan makanan dan minuman berkualitas dengan harga terjangkau. Kami menggunakan bahan-bahan segar dan resep tradisional yang telah teruji.</p>
+                <p>Setiap hidangan dibuat dengan penuh cinta dan perhatian untuk memastikan kepuasan pelanggan kami.</p>
+                
+                <div class="tentang-features">
+                    <div class="feature-box">
+                        <h4>✨ Bahan Berkualitas</h4>
+                        <p>Hanya menggunakan bahan segar dan berkualitas tinggi</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>💰 Harga Terjangkau</h4>
+                        <p>Menu dengan harga yang ramah di kantong</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>🚀 Pelayanan Cepat</h4>
+                        <p>Pesanan diproses dengan cepat dan efisien</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>😊 Rasa Nikmat</h4>
+                        <p>Cita rasa yang lezat dan menggugah selera</p>
+                    </div>
+                </div>
+            </div>
+            <div class="tentang-image">
+                <div class="about-chef">
+                    <img src="img/BEST SELLER.png" alt="" width="700" height="500">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="menu">
+    <h2 class="section-title">Menu</h2>
+    <div class="menu-container">
+        <button class="slider-btn left" onclick="slideMenu(-1)">‹</button>
+        <div class="menu-slider" id="menuSlider">
+            <?php
+            // Query untuk mengambil data menu dari database
+            $query = "SELECT * FROM menu ORDER BY id_menu ASC";
+            $result = mysqli_query($conn, $query);
+            
+            // Cek apakah ada data dan koneksi berhasil
+            if ($result && mysqli_num_rows($result) > 0) {
+                // Loop untuk menampilkan setiap menu dari database
+                while ($row = mysqli_fetch_assoc($result)) {
+                    ?>
+                    <div class="menu-item">
+                        <div class="menu-image" style="background-image: url('img/<?php echo htmlspecialchars($row['gambar_menu']); ?>');"></div>
+                        <div class="menu-info">
+                            <h3><?php echo htmlspecialchars($row['nama_menu']); ?></h3>
+                            <div class="menu-price">Rp <?php echo number_format($row['harga_menu'], 0, ',', '.'); ?></div>
+                        </div>
+                    </div>
+                    <?php
+                }
+            }
+            ?>
+        </div>
+        <button class="slider-btn right" onclick="slideMenu(1)">›</button>
+    </div>
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="pesan.php" class="order-btn" style="font-size: 18px; padding: 15px 40px; display: inline-block; text-align: center; text-decoration: none; cursor: pointer;">Pesan Sekarang</a>
+    </div>
+</section>
+
+    <section id="kontak">
+        <h2 class="section-title">Hubungi Kami</h2>
+        <div class="kontak-container">
+            <div class="kontak-info">
+                <div class="info-box">
+                    <h4>📍 Lokasi Jual</h4>
+                    <p>Depan Pabrik SAI<br>Pandean, Gondang, Nganjuk<br>Indonesia</p>
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d728.0764417402464!2d111.96473740035697!3d-7.529787241304638!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7837506616ca65%3A0xed2c4c8ba71ac0!2sPENTOL%20BAKAR%20PAK%20NDUT!5e0!3m2!1sid!2sid!4v1761654042692!5m2!1sid!2sid"
+                    width="600" height="360" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    <h4>📍 Lokasi Produksi</h4>
+                    <p>Indarwi Collection<br>Balonggebang, Gondang, Nganjuk<br>Indonesia</p>
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d571.2356269394016!2d111.96974004495371!3d-7.53099917148394!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7837bf5b33c7f7%3A0xec02437aa4aea52d!2sIradwi_collection!5e0!3m2!1sid!2sid!4v1761653980009!5m2!1sid!2sid"
+                    width="600" height="360" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+                <div class="info-box">
+                    <h4>📞 Telepon</h4>
+                    <p>
+                        <a href="https://wa.me/6285335696918" target="_blank" style="color: #25D366; text-decoration: none; font-weight: bold;">
+                            +62 853-3569-6918
+                        </a>
+                        <br>Senin - Minggu: 08.00 - 22.00 WIB
+                    </p>
+                </div>
+                <div class="info-box">
+                    <h4>💬 Media Sosial</h4>
+                    <a href="https://www.instagram.com/pentolbakar.pakndut" target="_blank">Instagram: @pentolbakar.pakndut</a><br>
+                    <a href="https://www.tiktok.com/@pentolbakar.pakndut" target="_blank">Tiktok: pentolbakar.pakndut</a>
+                </div>
+            </div>
+            <div class="contact-form">
+                <h3 style="margin-bottom: 25px; color: #333;">Kirim Ulasan</h3>
+                <?php
+                // Tampilkan notifikasi jika ada
+                if (isset($_GET['status'])) {
+                    if ($_GET['status'] == 'success') {
+                        echo '<div class="alert alert-success" style="background: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #c3e6cb;">Pesan berhasil dikirim!</div>';
+                    } elseif ($_GET['status'] == 'error') {
+                        $msg = isset($_GET['msg']) ? htmlspecialchars($_GET['msg']) : 'Terjadi kesalahan';
+                        echo '<div class="alert alert-danger" style="background: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #f5c6cb;">' . $msg . '</div>';
+                    }
+                }
+                ?>
+                <form id="contactForm" action="proses_kontak.php" method="POST">
+                    <div class="form-group">
+                        <label for="nama">Nama</label>
+                        <input type="text" id="nama" name="nama" required placeholder="Masukkan nama Anda">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required placeholder="Masukkan email Anda">
+                    </div>
+                    <div class="form-group">
+                        <label for="pesan">Pesan</label>
+                        <textarea id="pesan" name="pesan" rows="5" required placeholder="Tulis pesan Anda"></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">Kirim Pesan</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Kuliner Dapur Pak Ndut - UMKM Kuliner Terbaik. Semua Hak Dilindungi.</p>
+    </footer>
+</body>
+</html>
