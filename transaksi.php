@@ -23,8 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_transaksi']) && is
         
         if ($affected > 0) {
             $message = $action === 'selesai' 
-                ? "Transaksi berhasil diselesaikan! Stok otomatis berkurang." 
-                : "Transaksi berhasil dibatalkan! Data tersimpan untuk tracking.";
+                ? "Transaksi berhasil diselesaikan!." 
+                : "Transaksi berhasil dibatalkan!.";
             header("Location: transaksi.php?updated=1&action=$action&message=" . urlencode($message));
         } else {
             header("Location: transaksi.php?error=1&message=" . urlencode("Transaksi tidak ditemukan atau sudah diproses!"));
@@ -102,51 +102,74 @@ $periode_label = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transaksi - Dapur Pak Ndut</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
+        :root {
+            --orange: #FF8C00;
+            --light-orange: #FFA726;
+            --text-dark: #333;
+            --shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #FFF7E6, #FFD9A3);
             display: flex;
             min-height: 100vh;
         }
         
+        /* Sidebar */
         .sidebar {
-            background: linear-gradient(180deg, #FF9800, #F57C00);
-            width: 240px;
-            padding: 30px 20px;
-            box-shadow: 3px 0 15px rgba(0,0,0,0.2);
-            position: fixed;
-            height: 100vh;
-        }
-        
-        .sidebar h3 {
+            width: 250px;
+            background: linear-gradient(180deg, var(--orange), #FF8C00);
             color: white;
+            box-shadow: var(--shadow);
+            position: fixed;
+            height: 100%;
+            padding-top: 30px;
+        }
+
+        .sidebar .logo {
             text-align: center;
             margin-bottom: 30px;
-            font-size: 1.3em;
         }
-        
+
+        .sidebar .logo i {
+            font-size: 3rem;
+        }
+
+        .sidebar .logo h4 {
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
         .sidebar a {
             display: block;
-            color: white;
-            padding: 15px;
-            margin: 5px 0;
+            color: #fff;
+            padding: 12px 25px;
+            margin: 5px 15px;
             border-radius: 10px;
             text-decoration: none;
             transition: 0.3s;
         }
-        
-        .sidebar a:hover,
-        .sidebar a.active {
+
+        .sidebar a:hover, .sidebar a.active {
             background: rgba(255,255,255,0.2);
+        }
+
+        .sidebar a i {
+            margin-right: 10px;
         }
         
         .main {
-            margin-left: 260px;
-            padding: 20px;
+            margin-left: 250px;
+            padding: 30px;
             flex: 1;
+            width: calc(100% - 250px);
         }
         
         .header-section {
@@ -157,7 +180,7 @@ $periode_label = [
             background: white;
             padding: 20px;
             border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow);
         }
         
         .periode-selector {
@@ -173,10 +196,10 @@ $periode_label = [
         
         .periode-selector select {
             padding: 10px 20px;
-            border: 2px solid #FF9800;
+            border: 2px solid var(--orange);
             border-radius: 10px;
             background: white;
-            color: #FF9800;
+            color: var(--orange);
             font-weight: 600;
             cursor: pointer;
             font-size: 1em;
@@ -194,7 +217,7 @@ $periode_label = [
         }
         
         .periode-badge {
-            background: linear-gradient(135deg, #FF9800, #F57C00);
+            background: linear-gradient(135deg, var(--orange), #F57C00);
             color: white;
             padding: 8px 20px;
             border-radius: 20px;
@@ -213,7 +236,7 @@ $periode_label = [
             background: white;
             padding: 25px;
             border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow);
             text-align: center;
             transition: 0.3s;
         }
@@ -230,7 +253,7 @@ $periode_label = [
         }
         
         .stat-card p {
-            color: #FF9800;
+            color: var(--orange);
             font-size: 2em;
             font-weight: bold;
         }
@@ -253,10 +276,10 @@ $periode_label = [
         
         .filters a {
             padding: 10px 20px;
-            border: 2px solid #FF9800;
+            border: 2px solid var(--orange);
             border-radius: 25px;
             background: white;
-            color: #FF9800;
+            color: var(--orange);
             text-decoration: none;
             font-weight: 600;
             transition: 0.3s;
@@ -267,7 +290,7 @@ $periode_label = [
         }
         
         .filters a.active {
-            background: #FF9800;
+            background: var(--orange);
             color: white;
         }
         
@@ -276,11 +299,11 @@ $periode_label = [
             background: white;
             border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow);
         }
         
         thead {
-            background: linear-gradient(135deg, #FF9800, #F57C00);
+            background: linear-gradient(135deg, var(--orange), #F57C00);
         }
         
         thead th {
@@ -412,24 +435,37 @@ $periode_label = [
         }
         
         @media (max-width: 768px) {
-            .sidebar { width: 70px; }
-            .main { margin-left: 90px; }
+            .sidebar { 
+                width: 70px; 
+            }
+            
+            .sidebar .logo h4,
+            .sidebar a span {
+                display: none;
+            }
+            
+            .main { 
+                margin-left: 70px; 
+                width: calc(100% - 70px);
+            }
             .stats { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <aside class="sidebar">
-        <h3>🍽️ Dapur Pak Ndut</h3>
-        <nav>
-            <a href="admin.php">👤 Admin</a>
-            <a href="pendataan_menu.php">📖 Menu</a>
-            <a href="transaksi.php" class="active">🛒 Transaksi</a>
-            <a href="generate_laporan.php">📊 Laporan</a>
-            <a href="ulasan.php">💬 Ulasan</a>
-            <a href="login.php">🚪 Logout</a>
-        </nav>
-    </aside>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-utensils"></i>
+            <h4>Dapur Kuliner<br>Pak Ndut</h4>
+        </div>
+        <a href="admin.php"><i class="fas fa-user-shield"></i> <span>Data Admin</span></a>
+        <a href="pendataan_menu.php"><i class="fas fa-book"></i> <span>Data Menu</span></a>
+        <a href="transaksi.php" class="active"><i class="fas fa-shopping-cart"></i> <span>Transaksi</span></a>
+        <a href="generate_laporan.php"><i class="fas fa-file-alt"></i> <span>Laporan</span></a>
+        <a href="ulasan.php"><i class="fas fa-comment-dots"></i> <span>Ulasan</span></a>
+        <a href="login.php"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
+    </div>
 
     <main class="main">
         <!-- Header dengan Periode Selector -->
@@ -518,12 +554,12 @@ $periode_label = [
                             <td><span class="badge <?= $t['status'] ?>"><?= ucfirst($t['status']) ?></span></td>
                             <td>
                                 <div class="action-btns">
-                                    <a href="get_detail_transaksi.php?id=<?= $t['id_transaksi'] ?>" class="btn btn-detail">👁️ Detail</a>
+                                    <a href="get_detail_transaksi.php?id=<?= $t['id_transaksi'] ?>" class="btn btn-detail">📃Detail</a>
                                     
                                     <?php if ($t['status'] === 'pending'): ?>
                                         <!-- Button Selesai -->
                                         <form method="POST" style="display:inline;" 
-                                              onsubmit="return confirm('✅ Selesaikan transaksi ini?\n\nStok akan OTOMATIS berkurang via trigger database.')">
+                                              onsubmit="return confirm('✅ Selesaikan transaksi ini?\n\n')">
                                             <input type="hidden" name="id_transaksi" value="<?= $t['id_transaksi'] ?>">
                                             <input type="hidden" name="action" value="selesai">
                                             <button type="submit" class="btn btn-selesai">✅ Selesai</button>
@@ -531,7 +567,7 @@ $periode_label = [
                                         
                                         <!-- Button Batal -->
                                         <form method="POST" style="display:inline;" 
-                                              onsubmit="return confirm('❌ Batalkan transaksi ini?\n\nData tetap tersimpan untuk tracking.')">
+                                              onsubmit="return confirm('❌ Batalkan transaksi ini?\n\n')">
                                             <input type="hidden" name="id_transaksi" value="<?= $t['id_transaksi'] ?>">
                                             <input type="hidden" name="action" value="batal">
                                             <button type="submit" class="btn btn-batal">❌ Batal</button>

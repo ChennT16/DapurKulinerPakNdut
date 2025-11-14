@@ -105,9 +105,14 @@ $menu = mysqli_fetch_all($result, MYSQLI_ASSOC);
             cursor: pointer;
             font-size: 1em;
             font-weight: bold;
+            transition: all 0.3s ease;
         }
         
-        .btn:hover { background: #F57C00; }
+        .btn:hover { 
+            background: #F57C00; 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+        }
         
         .content { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
         
@@ -128,16 +133,19 @@ $menu = mysqli_fetch_all($result, MYSQLI_ASSOC);
             color: #FF9800;
             cursor: pointer;
             font-weight: 600;
+            transition: all 0.3s ease;
         }
         
+        .filter-btn:hover { background: #FFF3E0; }
         .filter-btn.active { background: #FF9800; color: white; }
         
         .menu-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 20px;
             max-height: 600px;
             overflow-y: auto;
+            padding: 10px;
         }
         
         .menu-card {
@@ -145,30 +153,93 @@ $menu = mysqli_fetch_all($result, MYSQLI_ASSOC);
             border-radius: 12px;
             overflow: hidden;
             text-align: center;
+            transition: all 0.3s ease;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border-color: #FF9800;
         }
         
         .menu-card img {
             width: 100%;
-            height: 150px;
+            height: 160px;
             object-fit: cover;
             background: #f3f4f6;
         }
         
-        .menu-card h4 { padding: 10px; color: #333; }
-        .menu-card .price { color: #FF9800; font-weight: bold; font-size: 1.2em; }
-        .menu-card .stock { color: #666; font-size: 0.9em; padding: 5px; }
+        .menu-info {
+            padding: 15px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
         
+        .menu-card h4 { 
+            color: #333; 
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .menu-card .price { 
+            color: #FF9800; 
+            font-weight: bold; 
+            font-size: 1.3em;
+            margin: 10px 0;
+        }
+        
+        .menu-card .stock { 
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #666;
+            font-size: 0.75em;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+        
+        /* BUTTON STYLING - KUNCI UTAMA */
         .menu-card button {
             width: 100%;
-            padding: 10px;
+            padding: 14px 20px;
             background: #FF9800;
             color: white;
             border: none;
             cursor: pointer;
             font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            border-radius: 0 0 10px 10px;
+            margin-top: auto;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
-        .menu-card button:disabled { background: #ccc; cursor: not-allowed; }
+        .menu-card button:hover:not(:disabled) { 
+            background: #F57C00;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+        }
+        
+        .menu-card button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        
+        .menu-card button:disabled { 
+            background: #ccc; 
+            cursor: not-allowed; 
+            opacity: 0.6;
+            transform: none;
+        }
         
         .cart-section { position: sticky; top: 20px; max-height: 90vh; overflow-y: auto; }
         
@@ -196,23 +267,43 @@ $menu = mysqli_fetch_all($result, MYSQLI_ASSOC);
         .qty-controls { display: flex; gap: 10px; align-items: center; }
         
         .qty-btn {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             border: none;
             background: #FF9800;
             color: white;
             border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 1.1em;
+            transition: all 0.2s ease;
+        }
+        
+        .qty-btn:hover:not(:disabled) {
+            background: #F57C00;
+            transform: scale(1.1);
+        }
+        
+        .qty-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.5;
         }
         
         .remove-btn {
             background: #ef4444;
             color: white;
             border: none;
-            padding: 5px 10px;
+            padding: 6px 12px;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 1em;
+            transition: all 0.2s ease;
+        }
+        
+        .remove-btn:hover {
+            background: #dc2626;
+            transform: scale(1.05);
         }
         
         .cart-total {
@@ -234,6 +325,12 @@ $menu = mysqli_fetch_all($result, MYSQLI_ASSOC);
             border-radius: 10px;
             margin-bottom: 20px;
             font-weight: bold;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
@@ -242,6 +339,12 @@ $menu = mysqli_fetch_all($result, MYSQLI_ASSOC);
         @media (max-width: 1024px) {
             .content { grid-template-columns: 1fr; }
             .cart-section { position: relative; top: 0; max-height: none; }
+            .menu-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+        }
+        
+        @media (max-width: 768px) {
+            .header { flex-direction: column; gap: 15px; }
+            .menu-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
         }
     </style>
 </head>
@@ -256,7 +359,7 @@ $menu = mysqli_fetch_all($result, MYSQLI_ASSOC);
         <?php if (isset($_GET['success'])): ?>
             <div class="alert alert-success">
                 ✅ Pesanan berhasil disimpan! ID: <?= htmlspecialchars($_GET['id']) ?>
-                <br>Stok otomatis dikurangi oleh trigger database.
+                <br>
             </div>
         <?php endif; ?>
         
@@ -332,10 +435,12 @@ $menu = mysqli_fetch_all($result, MYSQLI_ASSOC);
                 
                 return `
                     <div class="menu-card">
-                        <img src="img/${item.gambar_menu || 'default.jpg'}" alt="${item.nama_menu}">
-                        <h4>${item.nama_menu}</h4>
-                        <div class="price">${formatRp(item.harga_menu)}</div>
                         <div class="stock">Stok: ${stok}</div>
+                        <img src="img/${item.gambar_menu || 'default.jpg'}" alt="${item.nama_menu}">
+                        <div class="menu-info">
+                            <h4>${item.nama_menu}</h4>
+                            <div class="price">${formatRp(item.harga_menu)}</div>
+                        </div>
                         <button onclick="addToCart(${item.id_menu})" ${habis ? 'disabled' : ''}>
                             ${habis ? '❌ Habis' : '+ Tambah'}
                         </button>
@@ -392,8 +497,10 @@ $menu = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
         // Remove Item
         function removeItem(id) {
-            cart = cart.filter(c => c.id != id);
-            renderCart();
+            if (confirm('Hapus item ini dari keranjang?')) {
+                cart = cart.filter(c => c.id != id);
+                renderCart();
+            }
         }
 
         // Render Cart
@@ -417,11 +524,11 @@ $menu = mysqli_fetch_all($result, MYSQLI_ASSOC);
                         </div>
                         <div class="qty-controls">
                             <button type="button" class="qty-btn" onclick="updateQty(${item.id}, -1)">−</button>
-                            <span>${item.jumlah}</span>
+                            <span style="min-width: 30px; text-align: center; font-weight: bold;">${item.jumlah}</span>
                             <button type="button" class="qty-btn" onclick="updateQty(${item.id}, 1)" 
                                     ${item.jumlah >= item.stock ? 'disabled' : ''}>+</button>
                         </div>
-                        <div>
+                        <div style="text-align: right;">
                             <strong>${formatRp(subtotal)}</strong><br>
                             <button type="button" class="remove-btn" onclick="removeItem(${item.id})">🗑️</button>
                         </div>
@@ -460,6 +567,16 @@ $menu = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
         // Init
         renderMenu();
+        
+        // Auto hide alert setelah 5 detik
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
     </script>
 </body>
 </html>
