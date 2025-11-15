@@ -107,45 +107,76 @@ $periode_label = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transaksi - Dapur Pak Ndut</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --orange: #FF8C00;
+            --light-orange: #FFA726;
+            --text-dark: #333;
+            --shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #FFF7E6, #FFD9A3);
             display: flex;
             min-height: 100vh;
         }
+        
+        /* Sidebar - SAMA PERSIS dengan ulasan.php */
         .sidebar {
-            background: linear-gradient(180deg, #FF9800, #F57C00);
-            width: 240px;
-            padding: 30px 20px;
-            box-shadow: 3px 0 15px rgba(0,0,0,0.2);
-            position: fixed;
-            height: 100vh;
-        }
-        .sidebar h3 {
+            width: 250px;
+            background: linear-gradient(180deg, var(--orange), #FF8C00);
             color: white;
+            box-shadow: var(--shadow);
+            position: fixed;
+            height: 100%;
+            padding-top: 30px;
+        }
+        
+        .sidebar .logo {
             text-align: center;
             margin-bottom: 30px;
-            font-size: 1.3em;
         }
+        
+        .sidebar .logo i {
+            font-size: 3rem;
+        }
+        
+        .sidebar .logo h4 {
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+        
         .sidebar a {
             display: block;
-            color: white;
-            padding: 15px;
-            margin: 5px 0;
+            color: #fff;
+            padding: 12px 25px;
+            margin: 5px 15px;
             border-radius: 10px;
             text-decoration: none;
             transition: 0.3s;
         }
+        
         .sidebar a:hover, .sidebar a.active {
             background: rgba(255,255,255,0.2);
         }
-        .main {
-            margin-left: 260px;
-            padding: 20px;
-            flex: 1;
+        
+        .sidebar a i {
+            margin-right: 10px;
         }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+            width: calc(100% - 250px);
+        }
+        
         .header-section {
             display: flex;
             justify-content: space-between;
@@ -154,138 +185,174 @@ $periode_label = [
             background: white;
             padding: 20px;
             border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow);
         }
+        
         .periode-selector {
             display: flex;
             align-items: center;
             gap: 15px;
         }
+        
         .periode-selector label {
             font-weight: 600;
             color: #333;
         }
+        
         .periode-selector select {
             padding: 10px 20px;
-            border: 2px solid #FF9800;
+            border: 2px solid var(--orange);
             border-radius: 10px;
             background: white;
-            color: #FF9800;
+            color: var(--orange);
             font-weight: 600;
             cursor: pointer;
             font-size: 1em;
             outline: none;
             transition: 0.3s;
         }
+        
         .periode-selector select:hover {
             background: #FFF3E0;
         }
+        
         .periode-badge {
-            background: linear-gradient(135deg, #FF9800, #F57C00);
+            background: linear-gradient(135deg, var(--orange), var(--light-orange));
             color: white;
             padding: 8px 20px;
             border-radius: 20px;
             font-weight: 600;
             font-size: 0.95em;
         }
+        
         .stats {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 20px;
             margin-bottom: 30px;
         }
+        
         .stat-card {
             background: white;
             padding: 25px;
             border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow);
             text-align: center;
             transition: 0.3s;
         }
+        
         .stat-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
+        
         .stat-card h4 {
             color: #666;
             font-size: 0.9em;
             margin-bottom: 10px;
         }
+        
         .stat-card p {
-            color: #FF9800;
+            color: var(--orange);
             font-size: 2em;
             font-weight: bold;
         }
+        
         .stat-card.pending p { color: #f59e0b; }
         .stat-card.selesai p { color: #10b981; }
         .stat-card.batal p { color: #ef4444; }
+        
         h2 {
             color: #333;
             margin-bottom: 20px;
             font-size: 2em;
         }
+        
         .filters {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
         }
+        
         .filters a {
             padding: 10px 20px;
-            border: 2px solid #FF9800;
+            border: 2px solid var(--orange);
             border-radius: 25px;
             background: white;
-            color: #FF9800;
+            color: var(--orange);
             text-decoration: none;
             font-weight: 600;
             transition: 0.3s;
         }
+        
         .filters a:hover {
             background: #FFF3E0;
         }
+        
         .filters a.active {
-            background: #FF9800;
+            background: var(--orange);
             color: white;
         }
+        
         table {
             width: 100%;
             background: white;
             border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow);
+            border-collapse: collapse;
         }
+        
         thead {
-            background: linear-gradient(135deg, #FF9800, #F57C00);
+            background: linear-gradient(135deg, var(--orange), var(--light-orange));
         }
+        
         thead th {
             color: white;
             padding: 18px 15px;
             text-align: left;
+            font-weight: 600;
         }
+        
         tbody td {
             padding: 18px 15px;
             border-bottom: 1px solid #f0f0f0;
         }
+        
         tbody tr:hover {
             background: #FFF8E7;
         }
+        
+        tbody tr:nth-child(even) {
+            background-color: #fff5ea;
+        }
+        
+        tbody tr:nth-child(even):hover {
+            background: #FFF8E7;
+        }
+        
         .badge {
             padding: 6px 14px;
             border-radius: 20px;
             font-size: 0.85em;
             font-weight: 600;
         }
+        
         .badge.pending {
             background: #fff3cd;
             color: #856404;
         }
+        
         .badge.selesai {
             background: #d4edda;
             color: #155724;
         }
+        
         .badge.batal {
             background: #f8d7da;
             color: #721c24;
         }
+        
         .btn {
             padding: 8px 16px;
             color: white;
@@ -298,16 +365,19 @@ $periode_label = [
             margin: 0 3px;
             transition: 0.3s;
         }
+        
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
+        
         .btn-detail { background: #667eea; }
         .btn-detail:hover { background: #5568d3; }
         .btn-selesai { background: #4CAF50; }
         .btn-selesai:hover { background: #45a049; }
         .btn-batal { background: #ef4444; }
         .btn-batal:hover { background: #dc2626; }
+        
         .alert {
             padding: 15px 20px;
             border-radius: 10px;
@@ -315,54 +385,76 @@ $periode_label = [
             font-weight: 600;
             animation: slideDown 0.3s ease;
         }
+        
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        
         .alert-success {
             background: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
+        
         .alert-error {
             background: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+        
         .action-btns {
             display: flex;
             gap: 5px;
             flex-wrap: wrap;
         }
+        
         .empty-state {
             text-align: center;
             padding: 60px 20px;
             color: #999;
         }
+        
         @media (max-width: 1024px) {
             .stats { grid-template-columns: repeat(2, 1fr); }
             .header-section { flex-direction: column; gap: 15px; }
         }
+        
         @media (max-width: 768px) {
-            .sidebar { width: 70px; }
-            .main { margin-left: 90px; }
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar .logo h4,
+            .sidebar a span {
+                display: none;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+                width: calc(100% - 70px);
+            }
+            
             .stats { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <aside class="sidebar">
-        <h3>🍽️ Dapur Pak Ndut</h3>
-        <nav>
-            <a href="admin.php">👤 Admin</a>
-            <a href="pendataan_menu.php">📖 Menu</a>
-            <a href="transaksi.php" class="active">🛒 Transaksi</a>
-            <a href="generate_laporan.php">📊 Laporan</a>
-            <a href="ulasan.php">💬 Ulasan</a>
-            <a href="login.php">🚪 Logout</a>
-        </nav>
-    </aside>
-    <main class="main">
+    <!-- Sidebar - SAMA PERSIS dengan ulasan.php -->
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-utensils"></i>
+            <h4>Dapur Kuliner<br>Pak Ndut</h4>
+        </div>
+        <a href="admin.php"><i class="fas fa-user-shield"></i> <span>Data Admin</span></a>
+        <a href="pendataan_menu.php"><i class="fas fa-book"></i> <span>Data Menu</span></a>
+        <a href="transaksi.php" class="active"><i class="fas fa-shopping-cart"></i> <span>Transaksi</span></a>
+        <a href="generate_laporan.php"><i class="fas fa-file-alt"></i> <span>Laporan</span></a>
+        <a href="ulasan.php"><i class="fas fa-comment-dots"></i> <span>Ulasan</span></a>
+        <a href="login.php"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
+    </div>
+
+    <main class="main-content">
         <div class="header-section">
             <div class="periode-selector">
                 <label>📅 Periode:</label>
@@ -405,13 +497,16 @@ $periode_label = [
                 <p style="font-size: 1.5em;">Rp <?= number_format($stats['total_pendapatan'] ?? 0, 0, ',', '.') ?></p>
             </div>
         </div>
+        
         <h2>🛒 Daftar Transaksi</h2>
+        
         <div class="filters">
             <a href="?periode=<?= $periode ?>" class="<?= !$filter_status ? 'active' : '' ?>">Semua</a>
             <a href="?periode=<?= $periode ?>&status=pending" class="<?= $filter_status === 'pending' ? 'active' : '' ?>">Pending</a>
             <a href="?periode=<?= $periode ?>&status=selesai" class="<?= $filter_status === 'selesai' ? 'active' : '' ?>">Selesai</a>
             <a href="?periode=<?= $periode ?>&status=batal" class="<?= $filter_status === 'batal' ? 'active' : '' ?>">Batal</a>
         </div>
+        
         <table>
             <thead>
                 <tr>
@@ -442,7 +537,7 @@ $periode_label = [
                             </td>
                             <td>
                                 <div class="action-btns">
-                                    <a href="get_detail_transaksi.php?id=<?= $t['id_transaksi'] ?>" class="btn btn-detail">👁️ Detail</a>
+                                    <a href="get_detail_transaksi.php?id=<?= $t['id_transaksi'] ?>" class="btn btn-detail">📃 Detail</a>
                                     <?php if ($t['status'] === 'pending'): ?>
                                         <form method="POST" style="display:inline;" 
                                               onsubmit="return confirm('✅ Selesaikan transaksi ini?')">
@@ -472,6 +567,7 @@ $periode_label = [
             </tbody>
         </table>
     </main>
+    
     <script>
         setTimeout(() => {
             const alerts = document.querySelectorAll('.alert');
@@ -481,6 +577,7 @@ $periode_label = [
                 setTimeout(() => alert.remove(), 500);
             });
         }, 5000);
+        
         function changePeriode() {
             const periode = document.getElementById('periodeSelect').value;
             const currentStatus = new URLSearchParams(window.location.search).get('status') || '';
