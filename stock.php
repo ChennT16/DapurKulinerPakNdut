@@ -1,24 +1,8 @@
 <?php
 
-
 // ========== KONEKSI DATABASE ==========
 // Ganti dengan file koneksi Anda
 include 'koneksi.php'; 
-
-// ATAU jika belum punya, gunakan ini:
-/*
-$host = 'localhost';
-$user = 'root';
-$pass = '';
-$db = 'dapur_pak_ndut';
-
-$conn = new mysqli($host, $user, $pass, $db);
-
-if ($conn->connect_error) {
-  die("Koneksi gagal: " . $conn->connect_error);
-}
-*/
-// ======================================
 
 // Update stok dari form
 if ($_SERVER["REQUEST_METHOD"] === "POST") {

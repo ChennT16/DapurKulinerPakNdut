@@ -368,16 +368,16 @@ section {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: none;  /* <-- Hapus shadow */
+    box-shadow: none;  
     animation: pulse 7s infinite;
-    border-radius: 0;  /* <-- Hapus rounded corner */
+    border-radius: 0;  
     background: transparent;
 }
 
 .about-chef img {
     width: 100%;
     height: auto;
-    border-radius: 0;  /* <-- Hapus rounded corner */
+    border-radius: 0;  
     object-fit: cover;
     background: transparent;
 }

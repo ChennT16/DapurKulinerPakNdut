@@ -125,7 +125,7 @@ $periode_label = [
             min-height: 100vh;
         }
         
-        /* Sidebar - SAMA PERSIS dengan ulasan.php */
+        /* Sidebar*/
         .sidebar {
             width: 250px;
             background: linear-gradient(180deg, var(--orange), #FF8C00);
@@ -440,7 +440,7 @@ $periode_label = [
     </style>
 </head>
 <body>
-    <!-- Sidebar - SAMA PERSIS dengan ulasan.php -->
+    <!-- Sidebar -->
     <div class="sidebar">
         <div class="logo">
             <i class="fas fa-utensils"></i>
