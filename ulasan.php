@@ -258,6 +258,7 @@ $ulasan = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <tr>
                             <th>No</th>
                             <th>Nama Pelanggan</th>
+                            <th>Email</th>
                             <th>Ulasan</th>
                             <th>Rating</th>
                         </tr>
@@ -268,12 +269,13 @@ $ulasan = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <tr>
                                     <td><?= $no++ ?></td>
                                     <td><?= htmlspecialchars($u['nama']) ?></td>
+                                    <td><?= htmlspecialchars($u['email']) ?></td>
                                     <td><?= htmlspecialchars($u['komentar']) ?></td>
                                     <td class="rating"><?= str_repeat('★', $u['rating']) . str_repeat('☆', 5 - $u['rating']) ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <tr><td colspan="4" class="text-center text-muted py-4">Belum ada ulasan pelanggan</td></tr>
+                            <tr><td colspan="5" class="text-center text-muted py-4">Belum ada ulasan pelanggan</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>

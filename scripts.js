@@ -82,26 +82,19 @@ if (slider && menuItems.length > 0) {
 }
 
 // =======================
-// CONTACT FORM
+// AUTO HIDE NOTIFICATION
 // =======================
-const contactForm = document.getElementById('contactForm');
-if (contactForm) {
-    contactForm.addEventListener('submit', function (e) {
-    e.preventDefault();
-
-    var namaEl = document.getElementById('nama');
-    var emailEl = document.getElementById('email');
-    var pesanEl = document.getElementById('pesan');
-
-    var nama = namaEl ? namaEl.value.trim() : 'Tamu';
-    var email = emailEl ? emailEl.value.trim() : 'tidak tercantum';
-    var pesan = pesanEl ? pesanEl.value.trim() : '';
-
-    alert('Terima kasih ' + nama + '!\n\nPesan Anda telah diterima. Kami akan menghubungi Anda melalui ' + email + ' segera.');
-
-    contactForm.reset();
-    });
-}
+window.addEventListener('DOMContentLoaded', function() {
+    // Cek apakah ada parameter status di URL
+    if (window.location.search.includes('status=')) {
+        // Setelah 3 detik, hapus parameter dari URL
+        setTimeout(function() {
+            // Ambil URL tanpa query string tapi tetap dengan hash
+            var cleanUrl = window.location.pathname + window.location.hash;
+            window.history.replaceState({}, document.title, cleanUrl);
+        }, 3000);
+    }
+});
 
 // =======================
 // SMOOTH SCROLL

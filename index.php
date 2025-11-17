@@ -12,7 +12,7 @@ include 'koneksi.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dapur Pak Ndut - UMKM Kuliner Terbaik</title>
     <link rel="stylesheet" href="stile.css">
-    <script src="script.js" defer></script>
+    <script src="scripts.js" defer></script>
 </head>
 <body>
     <header id="header">
@@ -140,17 +140,19 @@ include 'koneksi.php';
             <div class="contact-form">
                 <h3 style="margin-bottom: 25px; color: #333;">Kirim Ulasan</h3>
                 <?php
-                // Tampilkan notifikasi jika ada
-                if (isset($_GET['status'])) {
-                    if ($_GET['status'] == 'success') {
-                        echo '<div class="alert alert-success" style="background: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #c3e6cb;">Pesan berhasil dikirim!</div>';
-                    } elseif ($_GET['status'] == 'error') {
-                        $msg = isset($_GET['msg']) ? htmlspecialchars($_GET['msg']) : 'Terjadi kesalahan';
-                        echo '<div class="alert alert-danger" style="background: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #f5c6cb;">' . $msg . '</div>';
+                // Tampilkan notifikasi dari SESSION
+                if (isset($_SESSION['notif'])) {
+                    $notif = $_SESSION['notif'];
+                    if ($notif['type'] == 'success') {
+                        echo '<div class="alert alert-success" style="background: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #c3e6cb;">' . htmlspecialchars($notif['msg']) . '</div>';
+                    } else {
+                        echo '<div class="alert alert-danger" style="background: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #f5c6cb;">' . htmlspecialchars($notif['msg']) . '</div>';
                     }
+                    // Hapus notifikasi setelah ditampilkan
+                    unset($_SESSION['notif']);
                 }
                 ?>
-                <form id="contactForm" action="proses_kontak.php" method="POST">
+                <form id="contactForm" action="proses_ulasan.php" method="POST">
                     <div class="form-group">
                         <label for="nama">Nama</label>
                         <input type="text" id="nama" name="nama" required placeholder="Masukkan nama Anda">
@@ -160,10 +162,20 @@ include 'koneksi.php';
                         <input type="email" id="email" name="email" required placeholder="Masukkan email Anda">
                     </div>
                     <div class="form-group">
-                        <label for="pesan">Pesan</label>
-                        <textarea id="pesan" name="pesan" rows="5" required placeholder="Tulis pesan Anda"></textarea>
+                        <label for="rating">Rating</label>
+                        <select id="rating" name="rating" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; background: white;">
+                            <option value="5">⭐⭐⭐⭐⭐ - Sangat Baik</option>
+                            <option value="4">⭐⭐⭐⭐ - Baik</option>
+                            <option value="3">⭐⭐⭐ - Cukup</option>
+                            <option value="2">⭐⭐ - Kurang</option>
+                            <option value="1">⭐ - Buruk</option>
+                        </select>
                     </div>
-                    <button type="submit" class="submit-btn">Kirim Pesan</button>
+                    <div class="form-group">
+                        <label for="pesan">Ulasan</label>
+                        <textarea id="pesan" name="pesan" rows="5" required placeholder="Tulis ulasan Anda"></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">Kirim Ulasan</button>
                 </form>
             </div>
         </div>
