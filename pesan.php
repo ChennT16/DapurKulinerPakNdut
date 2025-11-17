@@ -1,188 +1,612 @@
 <?php
-// Memulai session
-session_start();
+// pesan.php - TANPA JSON - Menggunakan Array POST Biasa
+require_once 'koneksi.php';
 
-// Include file koneksi database yang sudah ada
-include 'koneksi.php';
+// Proses Form POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    try {
+        $nama_pembeli = trim($_POST['nama_pembeli']);
+        $total_harga = (int)$_POST['total_harga'];
+        
+        // Ambil data items dari POST array
+        $item_ids = $_POST['item_id'] ?? [];
+        $item_names = $_POST['item_nama'] ?? [];
+        $item_prices = $_POST['item_harga'] ?? [];
+        $item_quantities = $_POST['item_jumlah'] ?? [];
+        $item_subtotals = $_POST['item_subtotal'] ?? [];
+        
+        // Validasi input
+        if (empty($nama_pembeli) || empty($item_ids)) {
+            throw new Exception('Data tidak lengkap!');
+        }
+        
+        // Mulai transaksi
+        mysqli_begin_transaction($conn);
+        
+        // Generate ID Transaksi
+        $id_transaksi = 'TRX' . time();
+        
+        // 1. INSERT ke tabel transaksi
+        $stmt = mysqli_prepare($conn, "INSERT INTO transaksi (id_transaksi, nama_pembeli, waktu, total_harga, status) 
+                                       VALUES (?, ?, NOW(), ?, 'pending')");
+        mysqli_stmt_bind_param($stmt, "ssi", $id_transaksi, $nama_pembeli, $total_harga);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+        
+        // 2. INSERT ke detail_transaksi (loop array)
+        $stmt = mysqli_prepare($conn, "INSERT INTO detail_transaksi (id_transaksi, id_menu, nama_menu, harga_satuan, jumlah, subtotal) 
+                                       VALUES (?, ?, ?, ?, ?, ?)");
+        
+        // Loop semua item yang ada di keranjang
+        for ($i = 0; $i < count($item_ids); $i++) {
+            $id_menu = $item_ids[$i];
+            $nama_menu = $item_names[$i];
+            $harga_satuan = (int)$item_prices[$i];
+            $jumlah = (int)$item_quantities[$i];
+            $subtotal = (int)$item_subtotals[$i];
+            
+            mysqli_stmt_bind_param($stmt, "sissii", 
+                $id_transaksi,
+                $id_menu,
+                $nama_menu,
+                $harga_satuan,
+                $jumlah,
+                $subtotal
+            );
+            mysqli_stmt_execute($stmt);
+        }
+        mysqli_stmt_close($stmt);
+        
+        // Commit transaksi
+        mysqli_commit($conn);
+        
+        // Redirect dengan pesan sukses
+        header("Location: pesan.php?success=1&id=" . $id_transaksi);
+        exit;
+        
+    } catch (Exception $e) {
+        mysqli_rollback($conn);
+        $error_message = $e->getMessage();
+    }
+}
+
+// Ambil data menu dari database
+$result = mysqli_query($conn, "SELECT id_menu, nama_menu, harga_menu, jenis_menu, stock_menu, gambar_menu 
+                                FROM menu 
+                                ORDER BY jenis_menu, nama_menu");
+$menu = mysqli_fetch_all($result, MYSQLI_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dapur Pak Ndut - UMKM Kuliner Terbaik</title>
-    <link rel="stylesheet" href="stile.css">
-    <script src="script.js" defer></script>
+    <title>Pemesanan - Dapur Pak Ndut</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+            padding: 20px;
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 { color: #FF9800; font-size: 2em; }
+        
+        .btn {
+            padding: 12px 25px;
+            background: #FF9800;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover { 
+            background: #F57C00; 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+        }
+        
+        .content { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+        
+        .menu-section, .cart-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .filters { display: flex; gap: 10px; margin: 20px 0; }
+        
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #FF9800;
+            border-radius: 25px;
+            background: white;
+            color: #FF9800;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn:hover { background: #FFF3E0; }
+        .filter-btn.active { background: #FF9800; color: white; }
+        
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .menu-card {
+            border: 2px solid #f3f4f6;
+            border-radius: 12px;
+            overflow: hidden;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border-color: #FF9800;
+        }
+        
+        .menu-card img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            background: #f3f4f6;
+        }
+        
+        .menu-info {
+            padding: 15px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .menu-card h4 { 
+            color: #333; 
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .menu-card .price { 
+            color: #FF9800; 
+            font-weight: bold; 
+            font-size: 1.3em;
+            margin: 10px 0;
+        }
+        
+        .menu-card .stock { 
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #666;
+            font-size: 0.75em;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+        
+        .menu-card button {
+            width: 100%;
+            padding: 14px 20px;
+            background: #FF9800;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            border-radius: 0 0 10px 10px;
+            margin-top: auto;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .menu-card button:hover:not(:disabled) { 
+            background: #F57C00;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+        }
+        
+        .menu-card button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        
+        .menu-card button:disabled { 
+            background: #ccc; 
+            cursor: not-allowed; 
+            opacity: 0.6;
+            transform: none;
+        }
+        
+        .cart-section { position: sticky; top: 20px; max-height: 90vh; overflow-y: auto; }
+        
+        .cart-section input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #FF9800;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 1em;
+        }
+        
+        .cart-items { margin: 20px 0; min-height: 100px; }
+        
+        .cart-item {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .qty-controls { display: flex; gap: 10px; align-items: center; }
+        
+        .qty-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #FF9800;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: all 0.2s ease;
+        }
+        
+        .qty-btn:hover:not(:disabled) {
+            background: #F57C00;
+            transform: scale(1.1);
+        }
+        
+        .qty-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        .remove-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.2s ease;
+        }
+        
+        .remove-btn:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+        }
+        
+        .cart-total {
+            border-top: 2px solid #ddd;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        
+        @media (max-width: 1024px) {
+            .content { grid-template-columns: 1fr; }
+            .cart-section { position: relative; top: 0; max-height: none; }
+            .menu-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+        }
+        
+        @media (max-width: 768px) {
+            .header { flex-direction: column; gap: 15px; }
+            .menu-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+        }
+    </style>
 </head>
 <body>
-    <header id="header">
-        <nav>
-            <a href="#tentang" class="logo">
-                <div class="logo-icon">👨‍🍳</div>
-                <span>Dapur Kuliner Pak Ndut</span>
-            </a>
-            <ul class="nav-links" id="navLinks">
-                <li><a href="#beranda">Beranda</a></li>
-                <li><a href="#tentang">Tentang</a></li>
-                <li><a href="#menu">Menu</a></li>
-                <li><a href="#kontak">Kontak</a></li>
-                <li><a href="login.php" class="login-btn">Login</a></li>
-            </ul>
-            <div class="PakNdut" id="PakNdut">
-                <div></div>
-                <div></div>
-                <div></div>
+    <div class="container">
+        <div class="header">
+            <h1>🍽️ Pemesanan Menu</h1>
+            <a href="index.php" class="btn">← Kembali</a>
+        </div>
+        
+        <!-- Alert Success -->
+        <?php if (isset($_GET['success'])): ?>
+            <div class="alert alert-success">
+                ✅ Pesanan berhasil disimpan! ID: <?= htmlspecialchars($_GET['id']) ?>
             </div>
-        </nav>
-    </header>
+        <?php endif; ?>
+        
+        <!-- Alert Error -->
+        <?php if (isset($error_message)): ?>
+            <div class="alert alert-error">
+                ❌ Error: <?= htmlspecialchars($error_message) ?>
+            </div>
+        <?php endif; ?>
 
-    <section id="beranda">
-    </section>
-
-    <section id="tentang">
-        <h2 class="section-title">Tentang Kami</h2>
-        <div class="tentang-content">
-            <div class="tentang-text">
-                <h3>UMKM Dapur Kuliner Pak Ndut</h3>
-                <p>Dapur Pak Ndut adalah UMKM kuliner yang berkomitmen menyajikan makanan dan minuman berkualitas dengan harga terjangkau. Kami menggunakan bahan-bahan segar dan resep tradisional yang telah teruji.</p>
-                <p>Setiap hidangan dibuat dengan penuh cinta dan perhatian untuk memastikan kepuasan pelanggan kami.</p>
+        <div class="content">
+            <!-- Menu Section -->
+            <div class="menu-section">
+                <h2>📋 Pilih Menu</h2>
                 
-                <div class="tentang-features">
-                    <div class="feature-box">
-                        <h4>✨ Bahan Berkualitas</h4>
-                        <p>Hanya menggunakan bahan segar dan berkualitas tinggi</p>
-                    </div>
-                    <div class="feature-box">
-                        <h4>💰 Harga Terjangkau</h4>
-                        <p>Menu dengan harga yang ramah di kantong</p>
-                    </div>
-                    <div class="feature-box">
-                        <h4>🚀 Pelayanan Cepat</h4>
-                        <p>Pesanan diproses dengan cepat dan efisien</p>
-                    </div>
-                    <div class="feature-box">
-                        <h4>😊 Rasa Nikmat</h4>
-                        <p>Cita rasa yang lezat dan menggugah selera</p>
-                    </div>
+                <div class="filters">
+                    <button class="filter-btn active" onclick="filterMenu('all')">Semua</button>
+                    <button class="filter-btn" onclick="filterMenu('makanan')">Makanan</button>
+                    <button class="filter-btn" onclick="filterMenu('minuman')">Minuman</button>
                 </div>
-            </div>
-            <div class="tentang-image">
-                <div class="about-chef">
-                    <img src="img/BEST SELLER.png" alt="" width="700" height="500">
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <section id="menu">
-    <h2 class="section-title">Menu</h2>
-    <div class="menu-container">
-        <button class="slider-btn left" onclick="slideMenu(-1)">‹</button>
-        <div class="menu-slider" id="menuSlider">
-            <?php
-            // Query untuk mengambil data menu dari database
-            $query = "SELECT * FROM menu ORDER BY id_menu ASC";
-            $result = mysqli_query($conn, $query);
-            
-            // Cek apakah ada data dan koneksi berhasil
-            if ($result && mysqli_num_rows($result) > 0) {
-                // Loop untuk menampilkan setiap menu dari database
-                while ($row = mysqli_fetch_assoc($result)) {
-                    ?>
-                    <div class="menu-item">
-                        <div class="menu-image" style="background-image: url('img/<?php echo htmlspecialchars($row['gambar_menu']); ?>');"></div>
-                        <div class="menu-info">
-                            <h3><?php echo htmlspecialchars($row['nama_menu']); ?></h3>
-                            <div class="menu-price">Rp <?php echo number_format($row['harga_menu'], 0, ',', '.'); ?></div>
+                <div class="menu-grid" id="menuGrid"></div>
+            </div>
+
+            <!-- Cart Section -->
+            <div class="cart-section">
+                <h2>🛒 Keranjang</h2>
+                
+                <form method="POST" action="" id="formCheckout">
+                    <input type="text" name="nama_pembeli" placeholder="Nama Pembeli" required>
+                    <input type="hidden" name="total_harga" id="inputTotalHarga">
+                    
+                    <!-- Container untuk hidden inputs item -->
+                    <div id="hiddenInputs"></div>
+                    
+                    <div id="cartItems" class="cart-items">
+                        <p style="text-align:center; color:#999;">Keranjang kosong</p>
+                    </div>
+                    
+                    <div class="cart-total">
+                        <div class="total-row">
+                            <span>TOTAL:</span>
+                            <span id="displayTotal">Rp 0</span>
                         </div>
+                        <button type="submit" class="btn" style="width:100%;" id="btnCheckout" disabled>
+                            Konfirmasi Pesanan
+                        </button>
                     </div>
-                    <?php
-                }
-            }
-            ?>
-        </div>
-        <button class="slider-btn right" onclick="slideMenu(1)">›</button>
-    </div>
-    <div style="text-align: center; margin-top: 30px;">
-        <a href="pesan.php" class="order-btn" style="font-size: 18px; padding: 15px 40px; display: inline-block; text-align: center; text-decoration: none; cursor: pointer;">Pesan Sekarang</a>
-    </div>
-</section>
-
-    <section id="kontak">
-        <h2 class="section-title">Hubungi Kami</h2>
-        <div class="kontak-container">
-            <div class="kontak-info">
-                <div class="info-box">
-                    <h4>📍 Lokasi Jual</h4>
-                    <p>Depan Pabrik SAI<br>Pandean, Gondang, Nganjuk<br>Indonesia</p>
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d728.0764417402464!2d111.96473740035697!3d-7.529787241304638!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7837506616ca65%3A0xed2c4c8ba71ac0!2sPENTOL%20BAKAR%20PAK%20NDUT!5e0!3m2!1sid!2sid!4v1761654042692!5m2!1sid!2sid"
-                    width="600" height="360" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                    <h4>📍 Lokasi Produksi</h4>
-                    <p>Indarwi Collection<br>Balonggebang, Gondang, Nganjuk<br>Indonesia</p>
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d571.2356269394016!2d111.96974004495371!3d-7.53099917148394!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7837bf5b33c7f7%3A0xec02437aa4aea52d!2sIradwi_collection!5e0!3m2!1sid!2sid!4v1761653980009!5m2!1sid!2sid"
-                    width="600" height="360" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                </div>
-                <div class="info-box">
-                    <h4>📞 Telepon</h4>
-                    <p>
-                        <a href="https://wa.me/6285335696918" target="_blank" style="color: #25D366; text-decoration: none; font-weight: bold;">
-                            +62 853-3569-6918
-                        </a>
-                        <br>Senin - Minggu: 08.00 - 22.00 WIB
-                    </p>
-                </div>
-                <div class="info-box">
-                    <h4>💬 Media Sosial</h4>
-                    <a href="https://www.instagram.com/pentolbakar.pakndut" target="_blank">Instagram: @pentolbakar.pakndut</a><br>
-                    <a href="https://www.tiktok.com/@pentolbakar.pakndut" target="_blank">Tiktok: pentolbakar.pakndut</a>
-                </div>
-            </div>
-            <div class="contact-form">
-                <h3 style="margin-bottom: 25px; color: #333;">Kirim Ulasan</h3>
-                <?php
-                // Tampilkan notifikasi dari SESSION
-                if (isset($_SESSION['notif'])) {
-                    $notif = $_SESSION['notif'];
-                    if ($notif['type'] == 'success') {
-                        echo '<div class="alert alert-success" style="background: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #c3e6cb;">' . htmlspecialchars($notif['msg']) . '</div>';
-                    } else {
-                        echo '<div class="alert alert-danger" style="background: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #f5c6cb;">' . htmlspecialchars($notif['msg']) . '</div>';
-                    }
-                    // Hapus notifikasi setelah ditampilkan
-                    unset($_SESSION['notif']);
-                }
-                ?>
-                <form action="proses_ulasan.php" method="POST" onsubmit="event.stopPropagation(); return true;">
-                    <div class="form-group">
-                        <label>Nama</label>
-                        <input type="text" name="nama" required placeholder="Masukkan nama Anda">
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" name="email" required placeholder="Masukkan email Anda">
-                    </div>
-                    <div class="form-group">
-                        <label>Rating</label>
-                        <select name="rating" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; background: white;">
-                            <option value="5">⭐⭐⭐⭐⭐ - Sangat Baik</option>
-                            <option value="4">⭐⭐⭐⭐ - Baik</option>
-                            <option value="3">⭐⭐⭐ - Cukup</option>
-                            <option value="2">⭐⭐ - Kurang</option>
-                            <option value="1">⭐ - Buruk</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Ulasan</label>
-                        <textarea name="pesan" rows="5" required placeholder="Tulis ulasan Anda"></textarea>
-                    </div>
-                    <button type="submit" class="submit-btn">Kirim Ulasan</button>
                 </form>
             </div>
         </div>
-    </section>
+    </div>
 
-    <footer>
-        <p>&copy; 2025 Kuliner Dapur Pak Ndut - UMKM Kuliner Terbaik. Semua Hak Dilindungi.</p>
-    </footer>
+    <script>
+        // Data menu dari PHP - Konversi manual ke JavaScript array
+        const menuData = [
+            <?php foreach ($menu as $index => $item): ?>
+            {
+                id_menu: <?= $item['id_menu'] ?>,
+                nama_menu: "<?= addslashes($item['nama_menu']) ?>",
+                harga_menu: <?= $item['harga_menu'] ?>,
+                jenis_menu: "<?= $item['jenis_menu'] ?>",
+                stock_menu: <?= $item['stock_menu'] ?>,
+                gambar_menu: "<?= $item['gambar_menu'] ?? 'default.jpg' ?>"
+            }<?= $index < count($menu) - 1 ? ',' : '' ?>
+            <?php endforeach; ?>
+        ];
+        
+        let cart = [];
+        let currentFilter = 'all';
+
+        // Format Rupiah
+        function formatRp(num) {
+            return 'Rp ' + parseInt(num).toLocaleString('id-ID');
+        }
+
+        // Render Menu
+        function renderMenu() {
+            const grid = document.getElementById('menuGrid');
+            const filtered = currentFilter === 'all' 
+                ? menuData 
+                : menuData.filter(m => m.jenis_menu === currentFilter);
+
+            grid.innerHTML = filtered.map(item => {
+                const stok = parseInt(item.stock_menu);
+                const habis = stok === 0;
+                
+                return `
+                    <div class="menu-card">
+                        <div class="stock">Stok: ${stok}</div>
+                        <img src="img/${item.gambar_menu}" alt="${item.nama_menu}">
+                        <div class="menu-info">
+                            <h4>${item.nama_menu}</h4>
+                            <div class="price">${formatRp(item.harga_menu)}</div>
+                        </div>
+                        <button onclick="addToCart(${item.id_menu})" ${habis ? 'disabled' : ''}>
+                            ${habis ? '❌ Habis' : '+ Tambah'}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Filter Menu
+        function filterMenu(category) {
+            currentFilter = category;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderMenu();
+        }
+
+        // Add to Cart
+        function addToCart(id) {
+            const menu = menuData.find(m => m.id_menu == id);
+            const cartItem = cart.find(c => c.id == id);
+
+            if (cartItem) {
+                if (cartItem.jumlah >= parseInt(menu.stock_menu)) {
+                    alert('Stok tidak cukup!');
+                    return;
+                }
+                cartItem.jumlah++;
+            } else {
+                cart.push({
+                    id: menu.id_menu,
+                    nama: menu.nama_menu,
+                    harga: parseInt(menu.harga_menu),
+                    jumlah: 1,
+                    stock: parseInt(menu.stock_menu)
+                });
+            }
+            renderCart();
+        }
+
+        // Update Quantity
+        function updateQty(id, change) {
+            const item = cart.find(c => c.id == id);
+            item.jumlah += change;
+            
+            if (item.jumlah <= 0) {
+                cart = cart.filter(c => c.id != id);
+            } else if (item.jumlah > item.stock) {
+                alert('Stok tidak cukup!');
+                item.jumlah = item.stock;
+            }
+            
+            renderCart();
+        }
+
+        // Remove Item
+        function removeItem(id) {
+            if (confirm('Hapus item ini dari keranjang?')) {
+                cart = cart.filter(c => c.id != id);
+                renderCart();
+            }
+        }
+
+        // Render Cart
+        function renderCart() {
+            const cartDiv = document.getElementById('cartItems');
+            const hiddenDiv = document.getElementById('hiddenInputs');
+            
+            if (cart.length === 0) {
+                cartDiv.innerHTML = '<p style="text-align:center; color:#999;">Keranjang kosong</p>';
+                hiddenDiv.innerHTML = '';
+                document.getElementById('displayTotal').textContent = 'Rp 0';
+                document.getElementById('btnCheckout').disabled = true;
+                return;
+            }
+
+            // Render tampilan cart
+            cartDiv.innerHTML = cart.map(item => {
+                const subtotal = item.harga * item.jumlah;
+                return `
+                    <div class="cart-item">
+                        <div>
+                            <strong>${item.nama}</strong><br>
+                            <small>${formatRp(item.harga)} × ${item.jumlah}</small>
+                        </div>
+                        <div class="qty-controls">
+                            <button type="button" class="qty-btn" onclick="updateQty(${item.id}, -1)">−</button>
+                            <span style="min-width: 30px; text-align: center; font-weight: bold;">${item.jumlah}</span>
+                            <button type="button" class="qty-btn" onclick="updateQty(${item.id}, 1)" 
+                                    ${item.jumlah >= item.stock ? 'disabled' : ''}>+</button>
+                        </div>
+                        <div style="text-align: right;">
+                            <strong>${formatRp(subtotal)}</strong><br>
+                            <button type="button" class="remove-btn" onclick="removeItem(${item.id})">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Generate hidden inputs untuk POST (TANPA JSON!)
+            let hiddenHTML = '';
+            cart.forEach((item, index) => {
+                const subtotal = item.harga * item.jumlah;
+                hiddenHTML += `
+                    <input type="hidden" name="item_id[]" value="${item.id}">
+                    <input type="hidden" name="item_nama[]" value="${item.nama}">
+                    <input type="hidden" name="item_harga[]" value="${item.harga}">
+                    <input type="hidden" name="item_jumlah[]" value="${item.jumlah}">
+                    <input type="hidden" name="item_subtotal[]" value="${subtotal}">
+                `;
+            });
+            hiddenDiv.innerHTML = hiddenHTML;
+
+            // Hitung total
+            const total = cart.reduce((sum, item) => sum + (item.harga * item.jumlah), 0);
+            document.getElementById('displayTotal').textContent = formatRp(total);
+            document.getElementById('inputTotalHarga').value = total;
+            
+            document.getElementById('btnCheckout').disabled = false;
+        }
+
+        // Konfirmasi sebelum submit
+        document.getElementById('formCheckout').onsubmit = function(e) {
+            const nama = this.nama_pembeli.value.trim();
+            const total = document.getElementById('displayTotal').textContent;
+            
+            if (!confirm(`Konfirmasi Pesanan?\n\nNama: ${nama}\nTotal: ${total}`)) {
+                e.preventDefault();
+                return false;
+            }
+        };
+
+        // Init
+        renderMenu();
+        
+        // Auto hide alert setelah 5 detik
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+    </script>
 </body>
 </html>
