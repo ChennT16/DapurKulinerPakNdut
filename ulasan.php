@@ -13,7 +13,7 @@ try {
 }
 
 // Ambil data ulasan
-$sql = "SELECT * FROM ulasan ORDER BY id DESC";
+$sql = "SELECT * FROM ulasan ORDER BY id_ulasan DESC";
 $stmt = $pdo->prepare($sql);
 $stmt->execute();
 $ulasan = $stmt->fetchAll(PDO::FETCH_ASSOC);

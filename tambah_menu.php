@@ -353,8 +353,7 @@ $kategori_result = mysqli_query($conn, $kategori_query);
                                 }
                             }
                             ?>
-                            <option value="Makanan">Makanan</option>
-                            <option value="Minuman">Minuman</option>
+                            
                         </select>
                     </div>
                     
@@ -365,8 +364,17 @@ $kategori_result = mysqli_query($conn, $kategori_query);
                 </div>
                 
                 <div class="form-group">
-                    <label>ID Produksi (Opsional)</label>
-                    <input type="text" name="id_produksi" placeholder="Contoh: 112233">
+                    <label>ID Produksi <span class="required">*</span></label>
+                    <select name="id_produksi" required>
+                        <option value="">-- Pilih ID Produksi --</option>
+                        <option value="1">1 PENTOL</option>
+                        <option value="2">2 NASI BENTO</option>
+                        <option value="3">3 ES</option>
+                        <option value="4">4 AIR MINERAL</option>
+                        <option value="5">5 SUSU KEDELAI</option>
+                        <option value="6">6 RICA RICA</option>
+                        <option value="7">7 GORENGAN</option>
+                    </select>
                 </div>
                 
                 <div class="form-group">

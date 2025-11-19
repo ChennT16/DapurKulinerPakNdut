@@ -389,8 +389,7 @@ $kategori_result = mysqli_query($conn, $kategori_query);
                                 }
                             }
                             ?>
-                            <option value="Makanan" <?php echo ($menu['jenis_menu'] == 'Makanan') ? 'selected' : ''; ?>>Makanan</option>
-                            <option value="Minuman" <?php echo ($menu['jenis_menu'] == 'Minuman') ? 'selected' : ''; ?>>Minuman</option>
+                            
                         </select>
                     </div>
                     
@@ -401,7 +400,7 @@ $kategori_result = mysqli_query($conn, $kategori_query);
                 </div>
                 
                 <div class="form-group">
-                    <label>ID Produksi (Opsional)</label>
+                    <label>ID Produksi </label>
                     <input type="text" name="id_produksi" value="<?php echo htmlspecialchars($menu['id_produksi']); ?>">
                 </div>
                 
