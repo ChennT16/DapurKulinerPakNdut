@@ -1,50 +1,59 @@
 <?php 
-// Koneksi Database
-$host = 'localhost';
-$dbname = 'umkm';
-$username = 'root';
-$password = '';
-
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    die("Koneksi gagal: " . $e->getMessage());
-}
+// Include file koneksi
+require_once 'koneksi.php';
 
 // Handle Tambah/Edit/Hapus Admin
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $action = $_POST['action'] ?? '';
     if ($action === 'tambah') {
-        $stmt = $pdo->prepare("INSERT INTO admin (nama, username, email, telepon, password) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([
-            $_POST['nama'], $_POST['username'], $_POST['email'], $_POST['telepon'], password_hash($_POST['password'], PASSWORD_DEFAULT)
-        ]);
-        header("Location: admin.php?success=tambah"); exit;
-    } elseif ($action === 'edit') {
-        $id = $_POST['id'];
-        if (!empty($_POST['password'])) {
-            $stmt = $pdo->prepare("UPDATE admin SET nama=?, username=?, email=?, telepon=?, password=? WHERE id=?");
-            $stmt->execute([$_POST['nama'], $_POST['username'], $_POST['email'], $_POST['telepon'], password_hash($_POST['password'], PASSWORD_DEFAULT), $id]);
-        } else {
-            $stmt = $pdo->prepare("UPDATE admin SET nama=?, username=?, email=?, telepon=? WHERE id=?");
-            $stmt->execute([$_POST['nama'], $_POST['username'], $_POST['email'], $_POST['telepon'], $id]);
+        $nama = mysqli_real_escape_string($conn, $_POST['nama']);
+        $user = mysqli_real_escape_string($conn, $_POST['username']);
+        $email = mysqli_real_escape_string($conn, $_POST['email']);
+        $telepon = mysqli_real_escape_string($conn, $_POST['telepon']);
+        $pass = password_hash($_POST['password'], PASSWORD_DEFAULT);
+        
+        $query = "INSERT INTO admin (nama, username, email, telepon, password) VALUES ('$nama', '$user', '$email', '$telepon', '$pass')";
+        
+        if (mysqli_query($conn, $query)) {
+            header("Location: admin.php?success=tambah");
+            exit;
         }
-        header("Location: admin.php?success=edit"); exit;
+    } elseif ($action === 'edit') {
+        $id = mysqli_real_escape_string($conn, $_POST['id']);
+        $nama = mysqli_real_escape_string($conn, $_POST['nama']);
+        $user = mysqli_real_escape_string($conn, $_POST['username']);
+        $email = mysqli_real_escape_string($conn, $_POST['email']);
+        $telepon = mysqli_real_escape_string($conn, $_POST['telepon']);
+        
+        if (!empty($_POST['password'])) {
+            $pass = password_hash($_POST['password'], PASSWORD_DEFAULT);
+            $query = "UPDATE admin SET nama='$nama', username='$user', email='$email', telepon='$telepon', password='$pass' WHERE id='$id'";
+        } else {
+            $query = "UPDATE admin SET nama='$nama', username='$user', email='$email', telepon='$telepon' WHERE id='$id'";
+        }
+        
+        if (mysqli_query($conn, $query)) {
+            header("Location: admin.php?success=edit");
+            exit;
+        }
     }
 }
 
 if (isset($_GET['action']) && $_GET['action'] == 'hapus') {
-    $stmt = $pdo->prepare("DELETE FROM admin WHERE id=?");
-    $stmt->execute([$_GET['id']]);
-    header("Location: admin.php?success=hapus"); exit;
+    $id = mysqli_real_escape_string($conn, $_GET['id']);
+    $query = "DELETE FROM admin WHERE id='$id'";
+    
+    if (mysqli_query($conn, $query)) {
+        header("Location: admin.php?success=hapus");
+        exit;
+    }
 }
 
 $search = $_GET['search'] ?? '';
-$query = "SELECT * FROM admin WHERE nama LIKE :s OR username LIKE :s OR email LIKE :s ORDER BY id DESC";
-$stmt = $pdo->prepare($query);
-$stmt->execute([':s' => "%$search%"]);
-$admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$search_escaped = mysqli_real_escape_string($conn, $search);
+$query = "SELECT * FROM admin WHERE nama LIKE '%$search_escaped%' OR username LIKE '%$search_escaped%' OR email LIKE '%$search_escaped%' ORDER BY id DESC";
+$result = mysqli_query($conn, $query);
+$admins = mysqli_fetch_all($result, MYSQLI_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -542,3 +551,6 @@ function hapusAdmin(id, nama){
 </script>
 </body>
 </html>
+<?php
+mysqli_close($conn);
+?>

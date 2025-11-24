@@ -385,9 +385,9 @@ $menu = mysqli_fetch_all($result, MYSQLI_ASSOC);
                 <h2>📋 Pilih Menu</h2>
                 
                 <div class="filters">
-                    <button class="filter-btn active" onclick="filterMenu('all')">Semua</button>
-                    <button class="filter-btn" onclick="filterMenu('makanan')">Makanan</button>
-                    <button class="filter-btn" onclick="filterMenu('minuman')">Minuman</button>
+                    <button class="filter-btn active" onclick="filterMenu('all', this)">Semua</button>
+                    <button class="filter-btn" onclick="filterMenu('makanan', this)">Makanan</button>
+                    <button class="filter-btn" onclick="filterMenu('minuman', this)">Minuman</button>
                 </div>
 
                 <div class="menu-grid" id="menuGrid"></div>
@@ -445,12 +445,18 @@ $menu = mysqli_fetch_all($result, MYSQLI_ASSOC);
             return 'Rp ' + parseInt(num).toLocaleString('id-ID');
         }
 
-        // Render Menu
+        // Render Menu - FIXED: Tambahkan toLowerCase() untuk case-insensitive
         function renderMenu() {
             const grid = document.getElementById('menuGrid');
+            
             const filtered = currentFilter === 'all' 
                 ? menuData 
-                : menuData.filter(m => m.jenis_menu === currentFilter);
+                : menuData.filter(m => m.jenis_menu.toLowerCase() === currentFilter.toLowerCase());
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">Tidak ada menu</p>';
+                return;
+            }
 
             grid.innerHTML = filtered.map(item => {
                 const stok = parseInt(item.stock_menu);
@@ -473,10 +479,10 @@ $menu = mysqli_fetch_all($result, MYSQLI_ASSOC);
         }
 
         // Filter Menu
-        function filterMenu(category) {
+        function filterMenu(category, element) {
             currentFilter = category;
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            element.classList.add('active');
             renderMenu();
         }
 
@@ -562,7 +568,7 @@ $menu = mysqli_fetch_all($result, MYSQLI_ASSOC);
                 `;
             }).join('');
 
-            // Generate hidden inputs untuk POST (TANPA JSON!)
+            // Generate hidden inputs untuk POST
             let hiddenHTML = '';
             cart.forEach((item, index) => {
                 const subtotal = item.harga * item.jumlah;
