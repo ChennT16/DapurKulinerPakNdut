@@ -1,15 +1,10 @@
 <?php
-// Koneksi ke database
-$host = 'localhost';
-$dbname = 'umkm';
-$username = 'root';
-$password = '';
+// Include file koneksi
+include 'koneksi.php'; // sesuaikan dengan nama file koneksi kamu
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    header("Location: index.php?status=error&msg=Koneksi database gagal#kontak");
+// Cek koneksi
+if (!$conn) {
+    header("Location: index.php?status=error&msg=Koneksi database gagal: " . urlencode(mysqli_connect_error()) . "#kontak");
     exit();
 }
 
@@ -23,12 +18,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Validasi input
     if (empty($nama) || empty($email) || empty($komentar)) {
         header("Location: index.php?status=error&msg=Semua field harus diisi#kontak");
+        mysqli_close($conn);
         exit();
     }
     
     // Validasi email
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         header("Location: index.php?status=error&msg=Format email tidak valid#kontak");
+        mysqli_close($conn);
         exit();
     }
     
@@ -38,24 +35,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $rating = 5;
     }
     
-    try {
-        // Insert ke database
-        $sql = "INSERT INTO ulasan (nama, email, komentar, rating) VALUES (:nama, :email, :komentar, :rating)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':nama', $nama);
-        $stmt->bindParam(':email', $email);
-        $stmt->bindParam(':komentar', $komentar);
-        $stmt->bindParam(':rating', $rating);
-        
-        if ($stmt->execute()) {
-            header("Location: index.php?status=success#kontak");
-        } else {
-            header("Location: index.php?status=error&msg=Gagal menyimpan ulasan#kontak");
-        }
-    } catch(PDOException $e) {
-        header("Location: index.php?status=error&msg=" . urlencode($e->getMessage()) . "#kontak");
+    // Escape string untuk keamanan (mencegah SQL injection)
+    $nama = mysqli_real_escape_string($conn, $nama);
+    $email = mysqli_real_escape_string($conn, $email);
+    $komentar = mysqli_real_escape_string($conn, $komentar);
+    
+    // Insert ke database
+    $sql = "INSERT INTO ulasan (nama, email, komentar, rating) VALUES ('$nama', '$email', '$komentar', $rating)";
+    
+    if (mysqli_query($conn, $sql)) {
+        header("Location: index.php?status=success#kontak");
+    } else {
+        header("Location: index.php?status=error&msg=" . urlencode("Gagal menyimpan ulasan: " . mysqli_error($conn)) . "#kontak");
     }
+    
+    mysqli_close($conn);
 } else {
+    mysqli_close($conn);
     header("Location: index.php#kontak");
 }
 exit();
