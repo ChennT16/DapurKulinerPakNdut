@@ -1,4 +1,5 @@
-<?php
+<?php 
+// Include file koneksi
 require_once 'koneksi.php';
 
 // Handle Edit/Hapus Admin
@@ -13,9 +14,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         if (!empty($_POST['password'])) {
             $pass = password_hash($_POST['password'], PASSWORD_DEFAULT);
-            $query = "UPDATE admin SET nama='$nama', username='$user', email='$email', telepon='$telepon', password='$pass' WHERE id='$id'";
+            $query = "UPDATE admin SET nama='$nama', username='$user', email='$email', telepon='$telepon', password='$pass' WHERE id_admin='$id'";
         } else {
-            $query = "UPDATE admin SET nama='$nama', username='$user', email='$email', telepon='$telepon' WHERE id='$id'";
+            $query = "UPDATE admin SET nama='$nama', username='$user', email='$email', telepon='$telepon' WHERE id_admin='$id'";
         }
         
         if (mysqli_query($conn, $query)) {
@@ -25,17 +26,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-if (isset($_GET['action']) && $_GET['action'] == 'hapus') {
+if (isset($_GET['action']) && $_GET['action'] == 'hapus' && isset($_GET['id'])) {
     $id = mysqli_real_escape_string($conn, $_GET['id']);
-    $query = "DELETE FROM admin WHERE id='$id'";
     
-    if (mysqli_query($conn, $query)) {
-        header("Location: admin.php?success=hapus");
+    // Cek apakah admin ada
+    $check = mysqli_query($conn, "SELECT * FROM admin WHERE id_admin='$id'");
+    if(mysqli_num_rows($check) > 0) {
+        // Cek apakah admin memiliki data terkait di tabel ulasan
+        $checkUlasan = mysqli_query($conn, "SELECT COUNT(*) as total FROM ulasan WHERE id_admin='$id'");
+        $dataUlasan = mysqli_fetch_assoc($checkUlasan);
+        
+        if($dataUlasan['total'] > 0) {
+            header("Location: admin.php?error=hasrelation");
+            exit;
+        }
+        
+        $query = "DELETE FROM admin WHERE id_admin='$id'";
+        
+        if (mysqli_query($conn, $query)) {
+            header("Location: admin.php?success=hapus");
+            exit;
+        } else {
+            header("Location: admin.php?error=sqlerror");
+            exit;
+        }
+    } else {
+        header("Location: admin.php?error=notfound");
         exit;
     }
 }
 
-$query = "SELECT * FROM admin ORDER BY id DESC";
+$query = "SELECT * FROM admin ORDER BY id_admin DESC";
 $result = mysqli_query($conn, $query);
 $admins = mysqli_fetch_all($result, MYSQLI_ASSOC);
 ?>
@@ -165,8 +186,6 @@ body {
     box-shadow: var(--shadow);
     border: none;
 }
-
-
 
 /* Table */
 .table {
@@ -329,6 +348,17 @@ body {
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php endif; ?>
+    
+    <?php if (isset($_GET['error'])): ?>
+        <div class="alert alert-danger alert-dismissible fade show">
+            <?php 
+                if ($_GET['error'] == 'notfound') echo '❌ Data admin tidak ditemukan!';
+                if ($_GET['error'] == 'hasrelation') echo '❌ Admin tidak dapat dihapus karena masih memiliki data ulasan!';
+                if ($_GET['error'] == 'sqlerror') echo '❌ Terjadi kesalahan saat menghapus data!';
+            ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
 
     <div class="header">
         <h2><i class="fas fa-user-shield"></i> Data Admin</h2>
@@ -360,7 +390,7 @@ body {
                             <button class="btn-edit" onclick='editAdmin(<?= json_encode($a) ?>)'>
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn-delete" onclick="hapusAdmin(<?= $a['id'] ?>, '<?= htmlspecialchars($a['nama']) ?>')">
+                            <button class="btn-delete" onclick="hapusAdmin(<?= $a['id_admin'] ?>, '<?= htmlspecialchars($a['nama']) ?>')">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
@@ -430,7 +460,7 @@ body {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 function editAdmin(a){
-    document.getElementById('edit_id').value = a.id;
+    document.getElementById('edit_id').value = a.id_admin;
     document.getElementById('edit_nama').value = a.nama;
     document.getElementById('edit_username').value = a.username;
     document.getElementById('edit_email').value = a.email;
@@ -443,16 +473,16 @@ function editAdmin(a){
 function hapusAdmin(id, nama){
     Swal.fire({
         title: 'Hapus Admin?',
-        text: `Yakin ingin menghapus "${nama}"?`,
+        text: 'Yakin ingin menghapus "' + nama + '"?',
         icon: 'warning', 
         showCancelButton: true,
         confirmButtonText: 'Ya, hapus!', 
         cancelButtonText: 'Batal',
         confirmButtonColor: '#FF8C00',
         cancelButtonColor: '#6c757d'
-    }).then(result => { 
+    }).then(function(result){ 
         if(result.isConfirmed){ 
-            window.location = `admin.php?action=hapus&id=${id}`; 
+            window.location.href = 'admin.php?action=hapus&id=' + id; 
         } 
     });
 }
