@@ -1,5 +1,4 @@
-<?php 
-// Include file koneksi
+<?php
 require_once 'koneksi.php';
 
 // Handle Edit/Hapus Admin

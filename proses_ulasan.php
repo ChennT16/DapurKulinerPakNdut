@@ -1,5 +1,4 @@
 <?php
-// Include file koneksi
 include 'koneksi.php'; // sesuaikan dengan nama file koneksi kamu
 
 // Cek koneksi

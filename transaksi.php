@@ -540,13 +540,13 @@ $periode_label = [
                                     <a href="get_detail_transaksi.php?id=<?= $t['id_transaksi'] ?>" class="btn btn-detail">📃 Detail</a>
                                     <?php if ($t['status'] === 'pending'): ?>
                                         <form method="POST" style="display:inline;" 
-                                              onsubmit="return confirm('✅ Selesaikan transaksi ini?')">
+                                                onsubmit="return confirm('✅ Selesaikan transaksi ini?')">
                                             <input type="hidden" name="id_transaksi" value="<?= $t['id_transaksi'] ?>">
                                             <input type="hidden" name="action" value="selesai">
                                             <button type="submit" class="btn btn-selesai">✅ Selesai</button>
                                         </form>
                                         <form method="POST" style="display:inline;" 
-                                              onsubmit="return confirm('❌ Batalkan transaksi ini?')">
+                                                onsubmit="return confirm('❌ Batalkan transaksi ini?')">
                                             <input type="hidden" name="id_transaksi" value="<?= $t['id_transaksi'] ?>">
                                             <input type="hidden" name="action" value="batal">
                                             <button type="submit" class="btn btn-batal">❌ Batal</button>

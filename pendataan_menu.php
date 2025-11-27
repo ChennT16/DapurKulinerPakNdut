@@ -31,9 +31,7 @@ body {
   display: flex;
 }
 
-/* =======================
-   SIDEBAR
-======================= */
+  /*SIDEBAR*/
 .sidebar {
   width: 250px;
   background: linear-gradient(180deg, var(--orange), #FF8C00);
@@ -78,9 +76,7 @@ body {
   margin-right: 10px;
 }
 
-/* =======================
-   MAIN CONTENT
-======================= */
+  /*MAIN CONTENT*/
 .main-content {
   margin-left: 250px;
   padding: 30px;
@@ -94,9 +90,7 @@ body {
   box-shadow: var(--shadow);
 }
 
-/* =======================
-   HEADER
-======================= */
+/*HEADER */
 .header {
   display: flex;
   justify-content: space-between;
@@ -139,9 +133,7 @@ body {
   text-decoration: none;
 }
 
-/* =======================
-   BUTTONS
-======================= */
+/*BUTTONS*/
 .btn {
   border: none;
   cursor: pointer;
@@ -201,9 +193,7 @@ body {
   transform: scale(1.05);
 }
 
-/* =======================
-   CONTROLS
-======================= */
+/*CONTROLS*/
 .controls {
   margin: 20px 0;
   display: flex;
@@ -232,9 +222,7 @@ body {
   border-color: var(--orange);
 }
 
-/* =======================
-   TABLE
-======================= */
+/*TABLE*/
 .table-container {
   overflow-x: auto;
 }
@@ -274,9 +262,7 @@ tbody tr:hover {
   border: 1px solid #ddd;
 }
 
-/* =======================
-   CATEGORY & PRICE
-======================= */
+/*CATEGORY & PRICE*/
 .menu-category {
   background: #ffcc80;
   color: #e65100;
@@ -304,9 +290,7 @@ tbody tr:hover {
   flex-wrap: wrap;
 }
 
-/* =======================
-   RESPONSIVE DESIGN
-======================= */
+/*RESPONSIVE DESIGN*/
 @media screen and (max-width: 768px) {
   .sidebar {
     width: 70px;

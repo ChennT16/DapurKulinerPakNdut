@@ -1,6 +1,4 @@
-// =======================
-// MOBILE NAVIGATION
-// =======================
+// MOBILE NAVIGATION//
 const burger = document.getElementById('PakNdut');
 const navLinks = document.getElementById('navLinks');
 
@@ -20,9 +18,7 @@ if (burger && navLinks) {
     }
 }
 
-// =======================
-// HEADER SCROLL EFFECT
-// =======================
+//HEADER SCROLL EFFECT// 
 window.addEventListener('scroll', function () {
     const header = document.getElementById('header');
     if (!header) return;
@@ -33,9 +29,7 @@ window.addEventListener('scroll', function () {
     }
 });
 
-// =======================
-// MENU SLIDER
-// =======================
+//MENU SLIDER//
 let currentSlide = 0;
 const slider = document.getElementById('menuSlider');
 const menuItems = document.querySelectorAll('.menu-item');
@@ -81,9 +75,7 @@ if (slider && menuItems.length > 0) {
     }, 5000);
 }
 
-// =======================
-// AUTO HIDE NOTIFICATION
-// =======================
+//AUTO HIDE NOTIFICATION//
 window.addEventListener('DOMContentLoaded', function() {
     // Cek apakah ada parameter status di URL
     if (window.location.search.includes('status=')) {
@@ -96,9 +88,7 @@ window.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// =======================
-// SMOOTH SCROLL
-// =======================
+//SMOOTH SCROLL//
 document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
     anchor.addEventListener('click', function (e) {
     var href = this.getAttribute('href');
@@ -115,9 +105,7 @@ document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
     });
 });
 
-// =======================
-// INTERSECTION OBSERVER (ANIMASI)
-// =======================
+//INTERSECTION OBSERVER (ANIMASI)//
 var observerOptions = {
     threshold: 0.1,
     rootMargin: '0px 0px -100px 0px'

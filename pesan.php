@@ -1,5 +1,4 @@
 <?php
-// pesan.php - TANPA JSON - Menggunakan Array POST Biasa
 require_once 'koneksi.php';
 
 // Proses Form POST

@@ -50,7 +50,7 @@ $sql = "INSERT INTO menu (nama_menu, harga_menu, jenis_menu, stock_menu, gambar_
             echo "<script>
                     alert('✅ Menu berhasil ditambahkan!');
                     window.location='pendataan_menu.php?pesan=sukses';
-                  </script>";
+                    </script>";
             exit();
         } else {
             $error_msg = "Gagal menyimpan data: " . mysqli_error($conn);

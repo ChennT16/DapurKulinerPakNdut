@@ -1,5 +1,4 @@
 <?php
-// get_detail_transaksi.php - Halaman Detail Transaksi (MySQLi)
 require_once 'koneksi.php';
 
 // Cek koneksi database

@@ -8,7 +8,7 @@ if ($id_menu == 0) {
     echo "<script>
             alert('❌ ID Menu tidak valid!');
             window.location='pendataan_menu.php';
-          </script>";
+            </script>";
     exit();
 }
 

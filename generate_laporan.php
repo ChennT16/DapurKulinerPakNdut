@@ -38,9 +38,7 @@ if (!$result) {
             display: flex;
         }
 
-        /* =======================
-           SIDEBAR
-        ======================= */
+        /*SIDEBAR*/
         .sidebar {
             width: 250px;
             background: linear-gradient(180deg, var(--orange), #FF8C00);
@@ -85,9 +83,7 @@ if (!$result) {
             margin-right: 10px;
         }
 
-        /* =======================
-           MAIN CONTENT
-        ======================= */
+        /*MAIN CONTENT*/
         .main-content {
             margin-left: 250px;
             padding: 30px;
@@ -207,9 +203,7 @@ if (!$result) {
             box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
         }
 
-        /* =======================
-           PRINT STYLES
-        ======================= */
+        /*PRINT STYLES*/
         @media print {
             body {
                 background: white;
@@ -248,9 +242,7 @@ if (!$result) {
             }
         }
 
-        /* =======================
-           RESPONSIVE
-        ======================= */
+        /*RESPONSIVE*/
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;

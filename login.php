@@ -14,8 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (mysqli_num_rows($result) == 1) {
         $row = mysqli_fetch_assoc($result);
         
-        // Verifikasi password (asumsi password di database dalam bentuk plain text atau hash)
-        // Jika menggunakan hash, gunakan: password_verify($password, $row['password'])
+        // Verifikasi password
         if ($password == $row['password']) {
             // Login berhasil - simpan data ke session
             $_SESSION['admin_id'] = $row['id'];
