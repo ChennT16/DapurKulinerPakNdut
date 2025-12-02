@@ -1,5 +1,4 @@
 <?php
-// transaksi.php - Update dengan Filter Periode & Button Selesai/Batal
 require_once 'koneksi.php';
 
 // ===== POST HANDLER =====

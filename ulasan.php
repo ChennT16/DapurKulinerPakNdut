@@ -1,22 +1,10 @@
 <?php 
-// Koneksi ke database
-$host = 'localhost';
-$dbname = 'umkm';
-$username = 'root';
-$password = '';
-
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    die("Koneksi gagal: " . $e->getMessage());
-}
+require_once 'koneksi.php';
 
 // Ambil data ulasan
 $sql = "SELECT * FROM ulasan ORDER BY id_ulasan DESC";
-$stmt = $pdo->prepare($sql);
-$stmt->execute();
-$ulasan = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$result = mysqli_query($conn, $sql);
+$ulasan = mysqli_fetch_all($result, MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>
