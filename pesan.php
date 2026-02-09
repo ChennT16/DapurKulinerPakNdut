@@ -614,4 +614,4 @@ $menu = mysqli_fetch_all($result, MYSQLI_ASSOC);
         }, 5000);
     </script>
 </body>
-</html>
+</html>k
